@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# edited by gaoxu
+.vscode/
+
 # Distribution / packaging
 .Python
 build/
