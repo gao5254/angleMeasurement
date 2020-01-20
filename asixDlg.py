@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import sys
 from PyQt5 import QtCore, QtWidgets
 
 
@@ -36,13 +35,17 @@ class axisDlg(QtWidgets.QDialog):
         self.setupUi()
         # self.exec_()
         # self.show()
+        self.points = []
 
     def setupUi(self):
         self.setObjectName("axisDlg")
         self.resize(500, 350)
-        self.listView = QtWidgets.QListView(self)
-        self.listView.setGeometry(QtCore.QRect(10, 10, 350, 250))
-        self.listView.setObjectName("listView")
+        self.listWidget = QtWidgets.QListWidget(self)
+        self.listWidget.setGeometry(QtCore.QRect(10, 10, 350, 250))
+        self.listWidget.setObjectName("listView")
+
+        # self.listModel = QtCore.QStringListModel()
+        # self.listView.setModel(self.listModel)
 
         self.addButton = QtWidgets.QPushButton(self)
         self.addButton.setGeometry(QtCore.QRect(380, 30, 93, 28))
@@ -52,11 +55,12 @@ class axisDlg(QtWidgets.QDialog):
         self.deleteButton = QtWidgets.QPushButton(self)
         self.deleteButton.setGeometry(QtCore.QRect(380, 80, 93, 28))
         self.deleteButton.setObjectName("deleteButton")
+        self.deleteButton.clicked.connect(self.delete)
 
         self.okButton = QtWidgets.QPushButton(self)
         self.okButton.setGeometry(QtCore.QRect(120, 290, 93, 28))
         self.okButton.setObjectName("okButton")
-        self.okButton.clicked.connect(self.accept)
+        self.okButton.clicked.connect(self.finish)
 
         self.cancelButton = QtWidgets.QPushButton(self)
         self.cancelButton.setGeometry(QtCore.QRect(270, 290, 93, 28))
@@ -76,14 +80,39 @@ class axisDlg(QtWidgets.QDialog):
         self.cancelButton.setText(_translate("axisDlg", "取消"))
 
     def add(self):
+        # print("distancesNeeded")
         self.distancesNeeded.emit()
+
+    def delete(self):
+        item = self.listWidget.currentItem()
+        row = self.listWidget.row(item)
+        if row > -1:
+            # print("删除第{}个".format(row+1))
+            self.listWidget.takeItem(row)
+            self.points.pop(row)
+        # print(self.points)
 
     def cancel(self):
         self.close()
 
+    def set_distances(self, distances: list) -> bool:
+        '''
+        接口函数，接受距离列表
+        供主程序调用，传入距离列表，显示并记录在类内部，返回设置成功
+        '''
+        self.points.append(distances)
+        self.listWidget.addItem(str(distances))
+        # print(self.points)
+
+    def finish(self):
+        # print("gatherFinished")
+        self.gatherFinished.emit(self.points)
+        self.close()
+
 
 if __name__ == '__main__':
-
+    import sys
+    from random import randint
     # 调用示例
     class WindowClass(QtWidgets.QWidget):
         def __init__(self):
@@ -99,10 +128,16 @@ if __name__ == '__main__':
         def showDialog(self):
             self.dialog = axisDlg()
             self.dialog.show()
-            self.dialog.distancesNeeded.connect(self.add)
+            self.dialog.distancesNeeded.connect(self.set_distances)
+            self.dialog.gatherFinished.connect(self.finished)
 
-        def add(self):
+        def set_distances(self):
             print("distancesNeeded")
+            self.dialog.set_distances([randint(0,10), randint(0,10), randint(0,10)])
+
+        def finished(self, alist):
+            print("gatherFinished")
+            print(alist)
 
 
     try:
