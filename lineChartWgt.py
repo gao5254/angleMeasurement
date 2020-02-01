@@ -9,7 +9,6 @@ from PyQt5.QtGui import QPainter
 class lineChartWgt(QChartView):
     def __init__(self):
         super().__init__()
-        self.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
         self.initChart()
 
     def initChart(self):
@@ -19,12 +18,16 @@ class lineChartWgt(QChartView):
         self._chart.setAnimationOptions(QChart.SeriesAnimations)
 
         self.series = QLineSeries(self._chart)
-        self.series.append(0, 6)
-        self.series.append(2, 4)
         self._chart.addSeries(self.series)
         self._chart.createDefaultAxes()  # 创建默认轴
-
         self.setChart(self._chart)
+        self.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
+
+        self.axisX = self._chart.axisX()
+        self.axisX.setRange(0, 20)  # 设置y轴范围
+        self.axisY = self._chart.axisY()
+        # axisY.setTickCount(7)  # y轴设置7个刻度
+        self.axisY.setRange(0, 180)  # 设置y轴范围
 
 
     def add_angle(self, curTime: int, curAngle: float) -> bool:
@@ -32,12 +35,19 @@ class lineChartWgt(QChartView):
         接口函数，接收一个新角度，并进行绘图
         供主程序调用，传入时间和角度，进行绘图，返回接收成功
         '''
-        pass
+        if curTime > 20:
+            max_x = (curTime // 5 + 1) * 5
+            self.axisX.setRange(max_x-20, max_x)
+        self.series.append(curTime, curAngle)
+        return True
 
 
 if __name__ == '__main__':
     import sys
+    from random import randint
+    import time
 
+    t_start = time.time()
     # 调用示例
     class WindowClass(QtWidgets.QWidget):
         def __init__(self):
@@ -55,7 +65,7 @@ if __name__ == '__main__':
             self.setLayout(layout)
 
         def add(self):
-            self.chart.series.append(1, 5.5)
+            flag = self.chart.add_angle(time.time()-t_start, randint(80, 120))
 
     try:
         app=QtWidgets.QApplication(sys.argv)
