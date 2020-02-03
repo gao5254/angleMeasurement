@@ -55,6 +55,9 @@ class hdwareConnector(object):
     # 完成打开设备的信号，每打开一个设备发送一次，返回已经打开的设备个数
     openFinished = pyqtSignal(int)
 
+    # 发生错误的信号，当硬件设备操作返回错误时发出，信号参数为错误代码
+    errorOccured = pyqtSignal(int)
+
 
     def __init__(self):
         # 定义三个线程对象
