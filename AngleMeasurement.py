@@ -27,7 +27,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.hdweConnector = hdwareConnector.hdwareConnector()
         self.dataProcessor = dataPrpcessor.dataPrpcessor()
         self.axisCalib = axisDlg.axisDlg()
-        # self.dynaChart = lineChartWgt.lineChartWgt()  
+        self.lineChartWgt = lineChartWgt.lineChartWgt()  
         self.datasaver = csvwriter.csvWriter() 
         
         # 信号
@@ -46,13 +46,15 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.timer_showDist = QTimer(self)
         self.timer_showDist.timeout.connect(self.show_dist)
         self.timer_showDist.start(2000)
+        self.timer_measdyna = QTimer(self)
+        self.timer_measdyna.timeout.connect(self.MeasDynamic)
         
         # 标定激光器参数
         with open("calibPara.json",'r') as load_f:
             load_dict = json.load(load_f)
         if set_calib_para(load_dict):
            self.statusBar().showMessage('成功标定激光器参数',self.timestatus)
-        else: self.statusBar().showMessage('错误：请检查标定参数文件',self.timestatus)
+        else: QMessageBox.critical(self, '错误提示','激光器标定失败')
         
         
     # 信号处理函数
@@ -66,14 +68,15 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         '''
         显示硬件错误代码；处理errorOccured信号
         '''         
-        self.statusBar().showMessage('硬件错误代码：'+str(code) + '，请检查硬件连接',self.timestatus)
+        QMessageBox.critical(self, '错误提示','硬件连接错误，错误代码'+str(code))
         self.btn_axis.setEnabled(False)
         self.btn_zero.setEnabled(False)
         self.btn_staticMeas.setEnabled(False)
         self.btn_dynaMeas.setEnabled(False)
+        self.btn_dynaMeas.setChecked(False)
         self.btn_save.setEnabled(False)
         self.timer_showDist.stop() 
-        # *关掉timer（实时显示+动态测量）
+        self.timer_measdyna.stop()
 
     # 功能函数
     def Open_Devices(self): 
@@ -86,10 +89,10 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
                        self.PortNumber.value() + 2 ]
         # 打开设备并开启线程进行扫描
         if self.hdweConnector.open_devices(portnumber):
-            self.statusBar().showMessage('成功连接端口',self.timestatus)
+            self.statusBar().showMessage('成功连接设备',self.timestatus)
             self.btn_close.setEnabled(True) 
             self.btn_axis.setEnabled(True) 
-        else: self.statusBar().showMessage('错误：无法连接端口，请检查端口重试',self.timestatus)
+        else: QMessageBox.critical(self, '错误提示','硬件连接失败')
     
     def show_dist():
         '''
@@ -124,7 +127,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         if self.dataProcessor.set_axis(twoDimenList):
             self.statusBar().showMessage('成功标定旋转轴',self.timestatus)
             self.btn_zero.setEnabled(True)
-        else: self.statusBar().showMessage('错误：标定旋转轴失败',self.timestatus)        
+        else: QMessageBox.critical(self, '错误提示','标定旋转轴失败')        
 
     def Set_Zero(self):
         '''
@@ -136,7 +139,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.btn_staticMeas.setEnabled(True)
             self.btn_dynaMeas.setEnabled(True)
             self.btn_save.setEnabled(True)
-        else: self.statusBar().showMessage('错误：确定零位面失败',self.timestatus)
+        else: QMessageBox.critical(self, '错误提示','确定零位面失败')
 
     def Meas_Static(self):
         '''
@@ -149,22 +152,28 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         '''
         动态测量：状态判断
         '''
+        if self.btn_save.isChecked():
+            self.datasaver.start_writing()
         if isChecked == True:
             # 按下状态，开启定时器
             self.btn_dynaMeas.setText('关闭动态测量') 
-            self.timer_measdyna = QTimer(self)
-            self.timer_measdyna.timeout.connect(self.MeasDynamic)
+            self.btn_save.setEnabled(False)
             self.timer_measdyna.start(2000) 
         else:
             # 弹起状态，关闭定时器
             self.btn_dynaMeas.setText('动态测量')
+            self.datasaver.stop_writing()
             self.timer_measdyna.stop()
 
     def MeasDynamic():       
         '''
         动态测量：计算及绘图
         ''' 
-
+        [time,distances] = self.hdweConnector.get_distances()
+        angle = self.dataProcessor.get_angle(distances) 
+        flag = self.lineChartWgt.add_angle(time,angle)                 
+        if self.btn_save.isChecked():     
+            self.datasaver.write_distances(time,distances,angle)
                 
     def Close_Devices(self):
         '''
@@ -173,8 +182,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         reply = QMessageBox.question(self, 'Message','确定关闭设备吗?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes: 
             self.hdweConnector.close_devices()
-
-            
+         
     def closeEvent(self, event):
         '''
         关闭对话框
@@ -187,12 +195,10 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             event.ignore()    
 
 
-
 if __name__ == '__main__':       
     app = QApplication(sys.argv) 
     MMW = MyMainWindow()         
     MMW.show()                   
     sys.exit(app.exec_())        
-    # hhhhhhhhhhhh
 
-            
+
