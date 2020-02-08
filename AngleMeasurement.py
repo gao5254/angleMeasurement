@@ -7,28 +7,34 @@ Created on Tue Feb  4 22:09:45 2020
 from ui import Ui_MainWindow
 import dataPrpcessor                    
 import hdwareConnector 
-import axisDlg
+import asixDlg
 import lineChartWgt
 import csvwriter
 
 import sys
 import json
+import time
 from PyQt5 import QtWidgets    
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox
 from PyQt5.QtCore import QTimer
+
 
 class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):  
     def __init__(self,parent=None): 
         super(MyMainWindow,self).__init__(parent)        
         self.setupUi(self)                                 
         self.timestatus = 3000 
-        
+
         # 重写成员变量
         self.hdweConnector = hdwareConnector.hdwareConnector()
         self.dataProcessor = dataPrpcessor.dataPrpcessor()
-        self.axisCalib = axisDlg.axisDlg()
+        self.axisCalib = asixDlg.axisDlg()
+        self.datasaver = csvwriter.csvWriter(self.checkbox_save)
         self.lineChartWgt = lineChartWgt.lineChartWgt()  
-        self.datasaver = csvwriter.csvWriter() 
+
+        # 添加动态测量绘图Widget
+        self.gridLayout.addWidget(self.lineChartWgt,5,0) 
+        self.gridLayout.setRowStretch(5, 60)
         
         # 信号
         self.hdweConnector.openFinished.connect(self.Signal_portFin)
@@ -50,9 +56,10 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.timer_measdyna.timeout.connect(self.MeasDynamic)
         
         # 标定激光器参数
-        with open("calibPara.json",'r') as load_f:
-            load_dict = json.load(load_f)
-        if set_calib_para(load_dict):
+        # with open("calibPara.json",'r') as load_f:
+        #     load_dict = json.load(load_f)
+        # if set_calib_para(load_dict):
+        if self.dataProcessor.set_calib_para({1:"123","name":"zhangsan","height" :180}): # 测试用例
            self.statusBar().showMessage('成功标定激光器参数',self.timestatus)
         else: QMessageBox.critical(self, '错误提示','激光器标定失败')
         
@@ -74,7 +81,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.btn_staticMeas.setEnabled(False)
         self.btn_dynaMeas.setEnabled(False)
         self.btn_dynaMeas.setChecked(False)
-        self.btn_save.setEnabled(False)
+        self.checkbox_save.setEnabled(False)
         self.timer_showDist.stop() 
         self.timer_measdyna.stop()
 
@@ -84,9 +91,9 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         连接硬件设备，标定激光器参数
         ''' 
         # 读取端口号
-        portnumber = [ self.PortNumber.value(),
-                       self.PortNumber.value() + 1, 
-                       self.PortNumber.value() + 2 ]
+        portnumber = [ self.spinbox_portNum.value(),
+                       self.spinbox_portNum.value() + 1, 
+                       self.spinbox_portNum.value() + 2 ]
         # 打开设备并开启线程进行扫描
         if self.hdweConnector.open_devices(portnumber):
             self.statusBar().showMessage('成功连接设备',self.timestatus)
@@ -94,7 +101,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.btn_axis.setEnabled(True) 
         else: QMessageBox.critical(self, '错误提示','硬件连接失败')
     
-    def show_dist():
+    def show_dist(self):
         '''
         实时显示激光位移器距离读数
         '''          
@@ -138,7 +145,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.statusBar().showMessage('成功确定零位面',self.timestatus)
             self.btn_staticMeas.setEnabled(True)
             self.btn_dynaMeas.setEnabled(True)
-            self.btn_save.setEnabled(True)
+            self.checkbox_save.setEnabled(True)
         else: QMessageBox.critical(self, '错误提示','确定零位面失败')
 
     def Meas_Static(self):
@@ -152,28 +159,37 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         '''
         动态测量：状态判断
         '''
-        if self.btn_save.isChecked():
-            self.datasaver.start_writing()
         if isChecked == True:
             # 按下状态，开启定时器
+            if self.checkbox_save.isChecked():
+                self.datasaver.start_writing()
+            self.btn_staticMeas.setEnabled(False)
             self.btn_dynaMeas.setText('关闭动态测量') 
-            self.btn_save.setEnabled(False)
+            self.checkbox_save.setEnabled(False)
+            self.t_start = time.time()
+            # self.Meas_Static()
             self.timer_measdyna.start(2000) 
         else:
             # 弹起状态，关闭定时器
             self.btn_dynaMeas.setText('动态测量')
-            self.datasaver.stop_writing()
+            self.btn_staticMeas.setEnabled(True)
             self.timer_measdyna.stop()
+            if self.checkbox_save.isChecked():
+                self.datasaver.stop_writing()   
 
-    def MeasDynamic():       
+    def MeasDynamic(self):       
         '''
         动态测量：计算及绘图
         ''' 
+        self.statusBar().showMessage('正在动态测量',self.timestatus)
         [time,distances] = self.hdweConnector.get_distances()
         angle = self.dataProcessor.get_angle(distances) 
-        flag = self.lineChartWgt.add_angle(time,angle)                 
-        if self.btn_save.isChecked():     
-            self.datasaver.write_distances(time,distances,angle)
+        self.lcdnum_staticMeas.display(angle)
+        self.lineChartWgt.add_angle(time-self.t_start,angle)       
+        # flag = self.chart.add_angle(time.time()-t_start, randint(80, 120))          
+        if self.checkbox_save.isChecked(): 
+            if self.datasaver.write_distances(time-self.t_start,distances,angle):
+                print('Saving...')               
                 
     def Close_Devices(self):
         '''
