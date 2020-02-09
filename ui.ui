@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1123</width>
-    <height>666</height>
+    <width>1134</width>
+    <height>689</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,24 +16,8 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="5,0">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="2,1,2,1,10,1">
-      <property name="spacing">
-       <number>20</number>
-      </property>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLCDNumber" name="lcdnum_dist1"/>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="lcdnum_dist3"/>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="lcdnum_dist2"/>
-        </item>
-       </layout>
-      </item>
-      <item>
+     <layout class="QGridLayout" name="gridLayout" rowstretch="5,10,5,10,5">
+      <item row="0" column="0">
        <widget class="QLabel" name="lab_dist">
         <property name="font">
          <font>
@@ -49,10 +33,20 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QLCDNumber" name="lcdnum_staticMeas"/>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLCDNumber" name="lcdnum_dist1"/>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="lcdnum_dist3"/>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="lcdnum_dist2"/>
+        </item>
+       </layout>
       </item>
-      <item>
+      <item row="2" column="0">
        <widget class="QLabel" name="lab_staticMeas">
         <property name="font">
          <font>
@@ -68,10 +62,10 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QGraphicsView" name="graphview_dynaMeas"/>
+      <item row="3" column="0">
+       <widget class="QLCDNumber" name="lcdnum_staticMeas"/>
       </item>
-      <item>
+      <item row="4" column="0">
        <widget class="QLabel" name="lab_dynaMeas">
         <property name="font">
          <font>
@@ -115,7 +109,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinbox_portNum"/>
+           <widget class="QSpinBox" name="spinbox_portNum">
+            <property name="value">
+             <number>3</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -225,7 +223,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="btn_save">
+         <widget class="QCheckBox" name="checkbox_save">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -268,7 +266,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1123</width>
+     <width>1134</width>
      <height>26</height>
     </rect>
    </property>
