@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from PyQt5.QtChart import QChartView, QChart, QLineSeries, QLegend, \
-    QCategoryAxis
+from PyQt5.QtChart import QChartView, QChart, QLineSeries
 from PyQt5.QtCore import Qt, QPointF, QRectF, QPoint
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtWidgets import QApplication, QGraphicsLineItem, QWidget, \
@@ -82,7 +81,7 @@ class lineChartWgt(QChartView):
         self.initChart()
         self.dataX = []
         self.resize(800, 600)
-        
+
 
 
     def resizeEvent(self, event):
