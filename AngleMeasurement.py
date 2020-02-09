@@ -29,7 +29,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.hdweConnector = hdwareConnector.hdwareConnector()
         self.dataProcessor = dataPrpcessor.dataPrpcessor()
         self.axisCalib = asixDlg.axisDlg()
-        self.datasaver = csvwriter.csvWriter(self.checkbox_save)
+        self.datasaver = csvwriter.csvWriter(self)
         self.lineChartWgt = lineChartWgt.lineChartWgt()  
 
         # 添加动态测量绘图Widget
@@ -39,6 +39,8 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         # 信号
         self.hdweConnector.openFinished.connect(self.Signal_portFin)
         self.hdweConnector.errorOccured.connect(self.Signal_hdweError)
+        self.axisCalib.distancesNeeded.connect(self.Get_Axis)
+        self.axisCalib.gatherFinished.connect(self.Calc_Axis)
         
         # 按钮
         self.btn_open.clicked.connect(self.Open_Devices)
@@ -56,10 +58,16 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.timer_measdyna.timeout.connect(self.MeasDynamic)
         
         # 标定激光器参数
-        # with open("calibPara.json",'r') as load_f:
-        #     load_dict = json.load(load_f)
-        # if set_calib_para(load_dict):
-        if self.dataProcessor.set_calib_para({1:"123","name":"zhangsan","height" :180}): # 测试用例
+        # 测试用例
+        # testDict = {1:"123","name":"zhangsan","height":180}
+        # testJson = json.dumps(testDict)
+        # with open("..\\calibPara.json",'w') as write_f:
+        #     write_f.write(testJson)
+        #     write_f.close()
+
+        with open("..\\calibPara.json",'r') as load_f:
+            load_dict = json.load(load_f)
+        if self.dataProcessor.set_calib_para(load_dict): 
            self.statusBar().showMessage('成功标定激光器参数',self.timestatus)
         else: QMessageBox.critical(self, '错误提示','激光器标定失败')
         
@@ -75,15 +83,14 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         '''
         显示硬件错误代码；处理errorOccured信号
         '''         
-        QMessageBox.critical(self, '错误提示','硬件连接错误，错误代码'+str(code))
+        self.timer_showDist.stop() 
+        self.btn_dynaMeas.setChecked(False)    # 触发Meas_Dynamic中的弹起部分
         self.btn_axis.setEnabled(False)
         self.btn_zero.setEnabled(False)
         self.btn_staticMeas.setEnabled(False)
         self.btn_dynaMeas.setEnabled(False)
-        self.btn_dynaMeas.setChecked(False)
         self.checkbox_save.setEnabled(False)
-        self.timer_showDist.stop() 
-        self.timer_measdyna.stop()
+        QMessageBox.critical(self, '错误提示','硬件连接错误，错误代码'+str(code))
 
     # 功能函数
     def Open_Devices(self): 
@@ -116,8 +123,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         旋转轴标定  
         '''
         self.axisCalib.show()
-        self.axisCalib.distancesNeeded.connect(self.Get_Axis)
-        self.axisCalib.gatherFinished.connect(self.Calc_Axis)
+
     
     def Get_Axis(self):
         '''
@@ -168,7 +174,6 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.btn_dynaMeas.setText('关闭动态测量') 
             self.checkbox_save.setEnabled(False)
             self.t_start = time.time()
-            # self.Meas_Static()
             self.timer_measdyna.start(2000) 
         else:
             # 弹起状态，关闭定时器
@@ -186,8 +191,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         [time,distances] = self.hdweConnector.get_distances()
         angle = self.dataProcessor.get_angle(distances) 
         self.lcdnum_staticMeas.display(angle)
-        self.lineChartWgt.add_angle(time-self.t_start,angle)       
-        # flag = self.chart.add_angle(time.time()-t_start, randint(80, 120))          
+        self.lineChartWgt.add_angle(time-self.t_start,angle)               
         if self.checkbox_save.isChecked(): 
             if self.datasaver.write_distances(time-self.t_start,distances,angle):
                 print('Saving...')               
