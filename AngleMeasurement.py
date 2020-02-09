@@ -50,8 +50,8 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         
         # 定时器
         self.timer_showDist = QTimer(self)
-        self.timer_showDist.timeout.connect(self.show_dist)
-        self.timer_showDist.start(2000)
+        self.timer_showDist.timeout.connect(self.Show_Dist)
+        
         self.timer_measdyna = QTimer(self)
         self.timer_measdyna.timeout.connect(self.MeasDynamic)
         
@@ -99,9 +99,10 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.statusBar().showMessage('成功连接设备',self.timestatus)
             self.btn_close.setEnabled(True) 
             self.btn_axis.setEnabled(True) 
+            self.timer_showDist.start(2000)
         else: QMessageBox.critical(self, '错误提示','硬件连接失败')
     
-    def show_dist(self):
+    def Show_Dist(self):
         '''
         实时显示激光位移器距离读数
         '''          
