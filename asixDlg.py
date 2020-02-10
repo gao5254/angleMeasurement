@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal, QRect, QMetaObject, QCoreApplication
+from PyQt5.QtWidgets import QDialog, QListWidget, QPushButton, QMessageBox, QWidget, QVBoxLayout, QApplication
 
 
-class axisDlg(QtWidgets.QDialog):
+class axisDlg(QDialog):
     # 需要外界传入距离的信号
-    distancesNeeded = QtCore.pyqtSignal()
+    distancesNeeded = pyqtSignal()
     # 数据采集完成的信号,传出采集到的距离的*二维列表*
-    gatherFinished = QtCore.pyqtSignal(list)
+    gatherFinished = pyqtSignal(list)
 
     # #声明无参数的信号
     # signal1 = pyqtSignal()
@@ -30,49 +32,44 @@ class axisDlg(QtWidgets.QDialog):
     # self.signal6[int,str].emit(1,"text")
     # self.signal6[str].emit("text")
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super(axisDlg, self).__init__(parent)
         self.setupUi()
-        # self.exec_()
-        # self.show()
         self.points = []
 
     def setupUi(self):
         self.setObjectName("axisDlg")
         self.resize(500, 350)
-        self.listWidget = QtWidgets.QListWidget(self)
-        self.listWidget.setGeometry(QtCore.QRect(10, 10, 350, 250))
+        self.listWidget = QListWidget(self)
+        self.listWidget.setGeometry(QRect(10, 10, 350, 260))
         self.listWidget.setObjectName("listView")
 
-        # self.listModel = QtCore.QStringListModel()
-        # self.listView.setModel(self.listModel)
-
-        self.addButton = QtWidgets.QPushButton(self)
-        self.addButton.setGeometry(QtCore.QRect(380, 30, 93, 28))
+        self.addButton = QPushButton(self)
+        self.addButton.setGeometry(QRect(380, 30, 93, 28))
         self.addButton.setObjectName("addButton")
         self.addButton.clicked.connect(self.add)
 
-        self.deleteButton = QtWidgets.QPushButton(self)
-        self.deleteButton.setGeometry(QtCore.QRect(380, 80, 93, 28))
+        self.deleteButton = QPushButton(self)
+        self.deleteButton.setGeometry(QRect(380, 80, 93, 28))
         self.deleteButton.setObjectName("deleteButton")
         self.deleteButton.clicked.connect(self.delete)
 
-        self.okButton = QtWidgets.QPushButton(self)
-        self.okButton.setGeometry(QtCore.QRect(120, 290, 93, 28))
+        self.okButton = QPushButton(self)
+        self.okButton.setGeometry(QRect(120, 290, 93, 28))
         self.okButton.setObjectName("okButton")
         self.okButton.clicked.connect(self.finish)
 
-        self.cancelButton = QtWidgets.QPushButton(self)
-        self.cancelButton.setGeometry(QtCore.QRect(270, 290, 93, 28))
+        self.cancelButton = QPushButton(self)
+        self.cancelButton.setGeometry(QRect(270, 290, 93, 28))
         self.cancelButton.setObjectName("cancelButton")
         self.cancelButton.clicked.connect(self.cancel)
 
         self.retranslateUi()
-        QtCore.QMetaObject.connectSlotsByName(self)
+        QMetaObject.connectSlotsByName(self)
 
 
     def retranslateUi(self):
-        _translate = QtCore.QCoreApplication.translate
+        _translate = QCoreApplication.translate
         self.setWindowTitle(_translate("axisDlg", "旋转轴标定"))
         self.addButton.setText(_translate("axisDlg", "添加"))
         self.deleteButton.setText(_translate("axisDlg", "删除"))
@@ -106,19 +103,22 @@ class axisDlg(QtWidgets.QDialog):
 
     def finish(self):
         # print("gatherFinished")
-        self.gatherFinished.emit(self.points)
-        self.close()
+        if len(self.points) < 3:
+            reply = QMessageBox.warning(self, "警告", "数据少于三个。", QMessageBox.Close, QMessageBox.Close)
+        else:
+            self.gatherFinished.emit(self.points)
+            self.close()
 
 
 if __name__ == '__main__':
     import sys
     from random import randint
     # 调用示例
-    class WindowClass(QtWidgets.QWidget):
+    class WindowClass(QWidget):
         def __init__(self):
             super().__init__()
-            layout=QtWidgets.QVBoxLayout()
-            self.btn=QtWidgets.QPushButton()
+            layout = QVBoxLayout()
+            self.btn = QPushButton()
             self.btn.setText("打开对话框")
             self.btn.clicked.connect(self.showDialog)
             self.resize(500,500)
@@ -141,18 +141,9 @@ if __name__ == '__main__':
 
 
     try:
-        app=QtWidgets.QApplication(sys.argv)
+        app=QApplication(sys.argv)
         win=WindowClass()
         win.show()
         sys.exit(app.exec_())
     finally:
         del app
-
-
-    # try:
-    #     app = QtWidgets.QApplication(sys.argv)
-    #     dlg = axisDlg()
-    #     dlg.show()
-    #     sys.exit(app.exec_())
-    # finally:
-    #     del app
