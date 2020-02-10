@@ -82,31 +82,42 @@ class lineChartWgt(QChartView):
     def __init__(self, parent=None):
         super(lineChartWgt, self).__init__(parent)
         self.initChart()
-        self.dataX = []
         self.resize(800, 600)
+        self.dataX = []
+        self.leftClicked = False
 
 
-    def updatePara(self, axisXRange=5, axisYRange=180,
+    def updateAxis(self, min_x=0, axisXRange=5, min_y=0, axisYRange=180,
                    axisXTickCount=11, axisYTickCount=11):
         self.axisXRange = axisXRange
         self.axisYRange = axisYRange
         self.axisXTickCount = axisXTickCount
         self.axisYTickCount = axisYTickCount
-        self.axisXStep = self.axisXRange / (self.axisXTickCount - 1)
-        self.axisYStep = self.axisYRange / (self.axisYTickCount - 1)
+        self.axisXStep = axisXRange / (axisXTickCount - 1)
+        self.axisYStep = axisYRange / (axisYTickCount - 1)
 
+        self.min_x = min_x
+        self.max_x = min_x + axisXRange
+        self.min_y = min_y
+        self.max_y = min_y + axisYRange
 
-    def resizeEvent(self, event):
-        # print("resize", self.min_x, self.min_y, self.max_y)
-        super(lineChartWgt, self).resizeEvent(event)
-        # 当窗口大小改变时需要重新计算
-        # 坐标系中左上角顶点
-        self.point_top = self._chart.mapToPosition(
-            QPointF(self.min_x, self.max_y))
-        # 坐标原点坐标
-        self.point_bottom = self._chart.mapToPosition(
-            QPointF(self.min_x, self.min_y))
-        # print(self.point_top, self.point_bottom)
+        self.axisX.setRange(self.min_x, self.max_x)  # 设置x轴范围
+        self.axisX.setTickCount(self.axisXTickCount)  # x轴设置刻度
+        self.axisY.setRange(self.min_y, self.max_y)  # 设置y轴范围
+        self.axisY.setTickCount(self.axisYTickCount)  # y轴设置刻度
+
+        # 获取x和y轴的最小最大值
+        # self.min_x, self.max_x = self.axisX.min(), self.axisX.max()
+        # self.min_y, self.max_y = self.axisY.min(), self.axisY.max()
+
+        # self.pointLeftTop = self._chart.mapToPosition(
+        #     QPointF(self.min_x, self.max_y))
+        # self.pointLeftBottom = self._chart.mapToPosition(
+        #     QPointF(self.min_x, self.min_y))
+        # self.pointRightBottom = self._chart.mapToPosition(
+        #     QPointF(self.max_x, self.min_y))
+        # self.xValuePerPos = (self.max_x - self.min_x) / (self.pointRightBottom.x() - self.pointLeftBottom.x())
+        # self.yValuePerPos = (self.max_y - self.min_y) / (self.pointLeftTop.y() - self.pointLeftBottom.y())
 
 
     def initChart(self):
@@ -127,7 +138,7 @@ class lineChartWgt(QChartView):
         self.axisX.setTitleText("时间 / s")
         self.axisY = self._chart.axisY()
         self.axisY.setTitleText("角度 / °")
-        self.initAxis()
+        self.updateAxis()
 
         # chart的图例
         legend = self._chart.legend()
@@ -146,15 +157,48 @@ class lineChartWgt(QChartView):
         self.lineItem.hide()
 
 
-    def initAxis(self):
-        self.updatePara()
-        self.axisX.setRange(0, self.axisXRange)  # 设置x轴范围
-        self.axisX.setTickCount(self.axisXTickCount)  # x轴设置刻度
-        self.axisY.setRange(0, self.axisYRange)  # 设置y轴范围
-        self.axisY.setTickCount(self.axisYTickCount)  # y轴设置刻度
-        # 获取x和y轴的最小最大值
-        self.min_x, self.max_x = self.axisX.min(), self.axisX.max()
-        self.min_y, self.max_y = self.axisY.min(), self.axisY.max()
+    def add_angle(self, curTime: int, curAngle: float) -> bool:
+        '''
+        接口函数，接收一个新角度，并进行绘图
+        供主程序调用，传入时间和角度，进行绘图，返回接收成功
+        '''
+        if curTime > self.axisXRange:
+            max_x = (curTime // self.axisXStep + 1) * self.axisXStep
+            if max_x > self.max_x:
+                self.max_x = max_x
+                self.min_x = max_x-self.axisXRange
+                self.axisX.setRange(self.min_x, self.max_x)
+        self.serie.append(curTime, curAngle)
+        self.dataX.append(curTime)
+        # print(self.dataX)
+        return True
+
+
+    def clearSeries(self):
+        for serie in self._chart.series():
+            serie.clear()
+        self.dataX = []
+        self.updateAxis()
+
+
+    def resizeEvent(self, event):
+        # print("resize", self.min_x, self.min_y, self.max_y)
+        super(lineChartWgt, self).resizeEvent(event)
+        # 当窗口大小改变时需要重新计算
+        # 坐标系中左上角顶点
+        # self.pointLeftTop = self._chart.mapToPosition(
+        #     QPointF(self.min_x, self.max_y))
+        # 坐标原点坐标
+        # self.pointLeftBottom = self._chart.mapToPosition(
+        #     QPointF(self.min_x, self.min_y))
+        self.pointLeftTop = self._chart.mapToPosition(
+            QPointF(self.min_x, self.max_y))
+        self.pointLeftBottom = self._chart.mapToPosition(
+            QPointF(self.min_x, self.min_y))
+        self.pointRightBottom = self._chart.mapToPosition(
+            QPointF(self.max_x, self.min_y))
+        self.xValuePerPos = (self.max_x - self.min_x) / (self.pointRightBottom.x() - self.pointLeftBottom.x())
+        self.yValuePerPos = (self.max_y - self.min_y) / (self.pointLeftTop.y() - self.pointLeftBottom.y())
 
 
     def mouseMoveEvent(self, event):
@@ -186,8 +230,8 @@ class lineChartWgt(QChartView):
 
         if points:
             pos = self._chart.mapToPosition(point)
-            self.lineItem.setLine(pos.x(), self.point_top.y(),
-                                  pos.x(), self.point_bottom.y())
+            self.lineItem.setLine(pos.x(), self.pointLeftTop.y(),
+                                  pos.x(), self.pointLeftBottom.y())
             self.lineItem.show()
             t_width = self.toolTipWidget.width()
             t_height = self.toolTipWidget.height()
@@ -202,29 +246,29 @@ class lineChartWgt(QChartView):
             self.toolTipWidget.hide()
             self.lineItem.hide()
 
-
-    def add_angle(self, curTime: int, curAngle: float) -> bool:
-        '''
-        接口函数，接收一个新角度，并进行绘图
-        供主程序调用，传入时间和角度，进行绘图，返回接收成功
-        '''
-        if curTime > self.axisXRange:
-            max_x = (curTime // self.axisXStep + 1) * self.axisXStep
-            if max_x > self.max_x:
-                self.max_x = max_x
-                self.min_x = max_x-self.axisXRange
-                self.axisX.setRange(self.min_x, self.max_x)
-        self.serie.append(curTime, curAngle)
-        self.dataX.append(curTime)
-        # print(self.dataX)
-        return True
+        if self.leftClicked:
+            # print(event.pos())
+            self._movePos = event.pos() - self._startPos
+            self.min_x -= (self._movePos.x() * self.xValuePerPos)
+            self.min_y -= (self._movePos.y() * self.yValuePerPos)
+            self.axisX.setRange(self.min_x, self.min_x+self.axisXRange)
+            self.axisY.setRange(self.min_y, self.min_y+self.axisYRange)
+            self._startPos = event.pos()
 
 
-    def clearSeries(self):
-        for serie in self._chart.series():
-            serie.clear()
-        self.dataX = []
-        self.initAxis()
+    def mousePressEvent(self, event):
+        super(lineChartWgt, self).mousePressEvent(event)
+        if event.button() == Qt.LeftButton:
+            self.leftClicked = True
+            self._startPos = event.pos()
+            # print("left", self.leftClicked)
+
+
+    def mouseReleaseEvent(self, event):
+        super(lineChartWgt, self).mouseReleaseEvent(event)
+        if event.button() == Qt.LeftButton:
+            self.leftClicked = False
+            # print("left", self.leftClicked)
 
 
 if __name__ == '__main__':
