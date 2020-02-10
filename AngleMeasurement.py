@@ -8,7 +8,7 @@ from ui import Ui_MainWindow
 import dataPrpcessor                    
 import hdwareConnector 
 import asixDlg
-import lineChartWgt
+# import lineChartWgt
 import csvwriter
 
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox
@@ -28,7 +28,10 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         self.dataProcessor = dataPrpcessor.dataPrpcessor()
         self.axisCalib = asixDlg.axisDlg()
         self.datasaver = csvwriter.csvWriter(self)
-        self.lineChartWgt = lineChartWgt.lineChartWgt()  
+        self.lineChartWgt = self.widget
+        # 在ui中导入并提升至lineChartWgt类（命名为self.widget）         
+        # self.lineChartWgt = lineChartWgt.lineChartWgt()  
+        
         
         # 信号
         self.hdweConnector.openFinished.connect(self.Signal_portFin)
