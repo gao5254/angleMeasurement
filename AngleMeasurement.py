@@ -11,18 +11,16 @@ import asixDlg
 import lineChartWgt
 import csvwriter
 
-import sys
-import json
-import time
-from PyQt5 import QtWidgets    
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox
 from PyQt5.QtCore import QTimer
+import sys
+import json
+import time    
 
-
-class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):  
+class MyMainWindow(QMainWindow,Ui_MainWindow):  
     def __init__(self,parent=None): 
         super(MyMainWindow,self).__init__(parent)        
-        self.setupUi(self)                                 
+        self.setupUi(self)                               
         self.timestatus = 3000 
 
         # 重写成员变量
@@ -31,10 +29,6 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.axisCalib = asixDlg.axisDlg()
         self.datasaver = csvwriter.csvWriter(self)
         self.lineChartWgt = lineChartWgt.lineChartWgt()  
-
-        # 添加动态测量绘图Widget
-        self.gridLayout.addWidget(self.lineChartWgt,5,0) 
-        self.gridLayout.setRowStretch(5, 60)
         
         # 信号
         self.hdweConnector.openFinished.connect(self.Signal_portFin)
@@ -53,17 +47,16 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         # 定时器
         self.timer_showDist = QTimer(self)
         self.timer_showDist.timeout.connect(self.Show_Dist)
-        
         self.timer_measdyna = QTimer(self)
         self.timer_measdyna.timeout.connect(self.MeasDynamic)
         
         # 标定激光器参数
         # 测试用例
-        # testDict = {1:"123","name":"zhangsan","height":180}
-        # testJson = json.dumps(testDict)
-        # with open("..\\calibPara.json",'w') as write_f:
-        #     write_f.write(testJson)
-        #     write_f.close()
+        testDict = {1:"123","name":"zhangsan","height":180}
+        testJson = json.dumps(testDict)
+        with open("..\\calibPara.json",'w') as write_f:
+            write_f.write(testJson)
+            write_f.close()
 
         with open("..\\calibPara.json",'r') as load_f:
             load_dict = json.load(load_f)
@@ -83,13 +76,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         '''
         显示硬件错误代码；处理errorOccured信号
         '''         
-        self.timer_showDist.stop() 
-        self.btn_dynaMeas.setChecked(False)    # 触发Meas_Dynamic中的弹起部分
-        self.btn_axis.setEnabled(False)
-        self.btn_zero.setEnabled(False)
-        self.btn_staticMeas.setEnabled(False)
-        self.btn_dynaMeas.setEnabled(False)
-        self.checkbox_save.setEnabled(False)
+        self.Close_Devices()
         QMessageBox.critical(self, '错误提示','硬件连接错误，错误代码'+str(code))
 
     # 功能函数
@@ -174,11 +161,12 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.btn_dynaMeas.setText('关闭动态测量') 
             self.checkbox_save.setEnabled(False)
             self.t_start = time.time()
-            self.timer_measdyna.start(2000) 
+            self.timer_measdyna.start(100) 
         else:
             # 弹起状态，关闭定时器
             self.btn_dynaMeas.setText('动态测量')
             self.btn_staticMeas.setEnabled(True)
+            self.checkbox_save.setEnabled(True)
             self.timer_measdyna.stop()
             if self.checkbox_save.isChecked():
                 self.datasaver.stop_writing()   
@@ -200,9 +188,16 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         '''
         关闭设备
         ''' 
-        reply = QMessageBox.question(self, 'Message','确定关闭设备吗?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-        if reply == QMessageBox.Yes: 
-            self.hdweConnector.close_devices()
+        # reply = QMessageBox.question(self, 'Message','确定关闭设备吗?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        # if reply == QMessageBox.Yes: 
+        self.timer_showDist.stop() 
+        self.btn_dynaMeas.setChecked(False)    # 触发Meas_Dynamic中的弹起部分
+        self.btn_axis.setEnabled(False)
+        self.btn_zero.setEnabled(False)
+        self.btn_staticMeas.setEnabled(False)
+        self.btn_dynaMeas.setEnabled(False)
+        self.checkbox_save.setEnabled(False)
+        self.hdweConnector.close_devices()
          
     def closeEvent(self, event):
         '''
@@ -211,6 +206,7 @@ class MyMainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         reply = QMessageBox.question(self, 'Message', '确定退出程序吗?',
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
+            self.Close_Devices()
             event.accept()
         else:
             event.ignore()    
@@ -221,5 +217,3 @@ if __name__ == '__main__':
     MMW = MyMainWindow()         
     MMW.show()                   
     sys.exit(app.exec_())        
-
-
