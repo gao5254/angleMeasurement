@@ -17,7 +17,7 @@
    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="5,1">
     <item>
      <widget class="QTabWidget" name="tabWidget_2">
-      <widget class="QWidget" name="tabWidgetPage1" native="true">
+      <widget class="QWidget" name="tabWidgetPage1">
        <attribute name="title">
         <string>结果</string>
        </attribute>
@@ -130,7 +130,7 @@
         <item>
          <widget class="QPushButton" name="btn_open">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="font">
            <font>

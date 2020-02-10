@@ -95,7 +95,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.spinbox_portNum)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.btn_open = QtWidgets.QPushButton(self.tab)
-        self.btn_open.setEnabled(True)
+        self.btn_open.setEnabled(False)
         font = QtGui.QFont()
         font.setFamily("宋体")
         font.setPointSize(11)
