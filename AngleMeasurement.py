@@ -32,7 +32,6 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         # 在ui中导入并提升至lineChartWgt类（命名为self.widget）         
         # self.lineChartWgt = lineChartWgt.lineChartWgt()  
         
-        
         # 信号
         self.hdweConnector.openFinished.connect(self.Signal_portFin)
         self.hdweConnector.errorOccured.connect(self.Signal_hdweError)
@@ -64,7 +63,8 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         with open("..\\calibPara.json",'r') as load_f:
             load_dict = json.load(load_f)
         if self.dataProcessor.set_calib_para(load_dict): 
-           self.statusBar().showMessage('成功标定激光器参数',self.timestatus)
+            self.btn_open.setEnabled(True)
+            self.statusBar().showMessage('成功标定激光器参数',self.timestatus)
         else: QMessageBox.critical(self, '错误提示','激光器标定失败')
         
         
@@ -113,7 +113,6 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         旋转轴标定  
         '''
         self.axisCalib.show()
-
     
     def Get_Axis(self):
         '''
