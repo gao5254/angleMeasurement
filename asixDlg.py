@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, QRect, QMetaObject, QCoreApplication
 from PyQt5.QtWidgets import QDialog, QListWidget, QPushButton, QMessageBox, QWidget, QVBoxLayout, QApplication
 
