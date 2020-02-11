@@ -159,6 +159,7 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
             # 按下状态，开启定时器
             if self.checkbox_save.isChecked():
                 self.datasaver.start_writing()
+            self.lineChartWgt.clearSeries()
             self.btn_staticMeas.setEnabled(False)
             self.btn_dynaMeas.setText('关闭动态测量') 
             self.checkbox_save.setEnabled(False)
