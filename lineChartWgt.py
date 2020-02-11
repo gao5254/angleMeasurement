@@ -82,12 +82,11 @@ class lineChartWgt(QChartView):
     def __init__(self, parent=None):
         super(lineChartWgt, self).__init__(parent)
         self.initChart()
-        self.resize(800, 600)
         self.dataX = []
         self.leftClicked = False
 
 
-    def updateAxis(self, min_x=0, axisXRange=5, min_y=0, axisYRange=180,
+    def updateAxis(self, minX=0, axisXRange=5, minY=0, axisYRange=180,
                    axisXTickCount=11, axisYTickCount=11):
         self.axisXRange = axisXRange
         self.axisYRange = axisYRange
@@ -96,28 +95,17 @@ class lineChartWgt(QChartView):
         self.axisXStep = axisXRange / (axisXTickCount - 1)
         self.axisYStep = axisYRange / (axisYTickCount - 1)
 
-        self.min_x = min_x
-        self.max_x = min_x + axisXRange
-        self.min_y = min_y
-        self.max_y = min_y + axisYRange
+        self.minX = minX
+        self.maxX = minX + axisXRange
+        self.minY = minY
+        self.maxY = minY + axisYRange
 
-        self.axisX.setRange(self.min_x, self.max_x)  # 设置x轴范围
+        self.axisX.setRange(self.minX, self.maxX)  # 设置x轴范围
         self.axisX.setTickCount(self.axisXTickCount)  # x轴设置刻度
-        self.axisY.setRange(self.min_y, self.max_y)  # 设置y轴范围
+        self.axisY.setRange(self.minY, self.maxY)  # 设置y轴范围
         self.axisY.setTickCount(self.axisYTickCount)  # y轴设置刻度
 
-        # 获取x和y轴的最小最大值
-        # self.min_x, self.max_x = self.axisX.min(), self.axisX.max()
-        # self.min_y, self.max_y = self.axisY.min(), self.axisY.max()
-
-        # self.pointLeftTop = self._chart.mapToPosition(
-        #     QPointF(self.min_x, self.max_y))
-        # self.pointLeftBottom = self._chart.mapToPosition(
-        #     QPointF(self.min_x, self.min_y))
-        # self.pointRightBottom = self._chart.mapToPosition(
-        #     QPointF(self.max_x, self.min_y))
-        # self.xValuePerPos = (self.max_x - self.min_x) / (self.pointRightBottom.x() - self.pointLeftBottom.x())
-        # self.yValuePerPos = (self.max_y - self.min_y) / (self.pointLeftTop.y() - self.pointLeftBottom.y())
+        self.locate()
 
 
     def initChart(self):
@@ -163,11 +151,11 @@ class lineChartWgt(QChartView):
         供主程序调用，传入时间和角度，进行绘图，返回接收成功
         '''
         if curTime > self.axisXRange:
-            max_x = (curTime // self.axisXStep + 1) * self.axisXStep
-            if max_x > self.max_x:
-                self.max_x = max_x
-                self.min_x = max_x-self.axisXRange
-                self.axisX.setRange(self.min_x, self.max_x)
+            maxX = (curTime // self.axisXStep + 1) * self.axisXStep
+            if maxX > self.maxX:
+                self.maxX = maxX
+                self.minX = maxX-self.axisXRange
+                self.axisX.setRange(self.minX, self.maxX)
         self.serie.append(curTime, curAngle)
         self.dataX.append(curTime)
         # print(self.dataX)
@@ -182,50 +170,46 @@ class lineChartWgt(QChartView):
 
 
     def resizeEvent(self, event):
-        # print("resize", self.min_x, self.min_y, self.max_y)
         super(lineChartWgt, self).resizeEvent(event)
         # 当窗口大小改变时需要重新计算
-        # 坐标系中左上角顶点
-        # self.pointLeftTop = self._chart.mapToPosition(
-        #     QPointF(self.min_x, self.max_y))
-        # 坐标原点坐标
-        # self.pointLeftBottom = self._chart.mapToPosition(
-        #     QPointF(self.min_x, self.min_y))
+        self.locate()
+
+
+    def locate(self):
         self.pointLeftTop = self._chart.mapToPosition(
-            QPointF(self.min_x, self.max_y))
+            QPointF(self.minX, self.maxY))
         self.pointLeftBottom = self._chart.mapToPosition(
-            QPointF(self.min_x, self.min_y))
+            QPointF(self.minX, self.minY))
         self.pointRightBottom = self._chart.mapToPosition(
-            QPointF(self.max_x, self.min_y))
-        self.xValuePerPos = (self.max_x - self.min_x) / (self.pointRightBottom.x() - self.pointLeftBottom.x())
-        self.yValuePerPos = (self.max_y - self.min_y) / (self.pointLeftTop.y() - self.pointLeftBottom.y())
+            QPointF(self.maxX, self.minY))
+        self.xValuePerPos = (self.maxX - self.minX) / (self.pointRightBottom.x() - self.pointLeftBottom.x())
+        self.yValuePerPos = (self.maxY - self.minY) / (self.pointLeftTop.y() - self.pointLeftBottom.y())
 
 
     def mouseMoveEvent(self, event):
         super(lineChartWgt, self).mouseMoveEvent(event)
-
-        mousePos = event.pos()
         # 把鼠标位置所在点转换为对应的xy值, xy为在chart中的坐标值
-        x = self._chart.mapToValue(mousePos).x()
-        y = self._chart.mapToValue(mousePos).y()
+        valuePos = self._chart.mapToValue(event.pos())
+        xValue = valuePos.x()
+        yValue = valuePos.y()
         points = []
         if self.dataX:
             for index, data_x in enumerate(self.dataX):
-                if data_x >= x:
+                if data_x >= xValue:
                     break
             if  index != 0:
-                a = x-self.dataX[index-1]
-                b = self.dataX[index]-x
+                a = xValue-self.dataX[index-1]
+                b = self.dataX[index]-xValue
                 if a < b:
                     index -= 1
             # 得到在坐标系中的所有正常显示的series的类型和点
             # print(index)
             for serie in self._chart.series():
                 point = serie.at(index)
-                if abs(point.x()-x)<self.axisXStep and \
-                      abs(point.y()-y)<self.axisYStep and \
-                      self.min_x <= x <= self.max_x and \
-                      self.min_y <= y <= self.max_y:
+                if abs(point.x()-xValue)<self.axisXStep and \
+                      abs(point.y()-yValue)<self.axisYStep and \
+                      self.minX <= xValue <= self.maxX and \
+                      self.minY <= yValue <= self.maxY:
                     points.append((serie, point))
 
         if points:
@@ -249,10 +233,12 @@ class lineChartWgt(QChartView):
         if self.leftClicked:
             # print(event.pos())
             self._movePos = event.pos() - self._startPos
-            self.min_x -= (self._movePos.x() * self.xValuePerPos)
-            self.min_y -= (self._movePos.y() * self.yValuePerPos)
-            self.axisX.setRange(self.min_x, self.min_x+self.axisXRange)
-            self.axisY.setRange(self.min_y, self.min_y+self.axisYRange)
+            self.minX -= (self._movePos.x() * self.xValuePerPos)
+            self.maxX = self.minX + self.axisXRange
+            self.minY -= (self._movePos.y() * self.yValuePerPos)
+            self.maxY = self.minY + self.axisYRange
+            self.axisX.setRange(self.minX, self.maxX)
+            self.axisY.setRange(self.minY, self.maxY)
             self._startPos = event.pos()
 
 
@@ -269,6 +255,28 @@ class lineChartWgt(QChartView):
         if event.button() == Qt.LeftButton:
             self.leftClicked = False
             # print("left", self.leftClicked)
+
+
+    def wheelEvent(self, event):
+        super(lineChartWgt, self).wheelEvent(event)
+        valuePos = self._chart.mapToValue(event.pos())
+        xValue = valuePos.x()
+        yValue = valuePos.y()
+        if event.angleDelta().y() < 0:
+            # 缩小，视野变大
+            scale = 1.2
+        else:
+            # 放大，视野变小
+            scale = 0.8
+
+        self.axisXRange *= scale
+        self.minX -= (xValue - self.minX) * (scale - 1)
+        self.axisYRange *= scale
+        self.minY -= (yValue - self.minY) * (scale - 1)
+
+        self.updateAxis(minX=self.minX, axisXRange=self.axisXRange,
+                        minY=self.minY, axisYRange=self.axisYRange,
+                        axisXTickCount=11, axisYTickCount=11)
 
 
 if __name__ == '__main__':
