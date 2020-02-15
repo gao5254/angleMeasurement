@@ -74,15 +74,21 @@ class dataProcessor(QObject):
             array[i]=self.get_vector(distancesList[i])
         #将列表转化为矩阵
         y1=[[1]*1]*ncols
+        a=[[-1]*1]*ncols
+        a=np.array(a)
+        #a=np.transpose(a)
         y=np.array(y1)
         A=np.array(array)
         A=np.transpose(A)
         A=np.dot(self.a,A)
         A=np.transpose(A)#n*3
-        At=np.transpose(A) #转置
+        A1=A[:,0:2]
+        A1=np.append(A1, a, axis=1)
+        y=-100*A[:,2]
+        At=np.transpose(A1) #转置
         #y=np.transpose(y2)#转置
         #最小二乘法求旋转轴
-        X=np.dot(np.dot(np.linalg.inv(np.dot(At,A)),At),y)
+        X=np.dot(np.dot(np.linalg.inv(np.dot(At,A1)),At),y)
         #旋转轴乘以旋转矩阵，并归一化
         #X=np.transpose(X)
         #X=np.dot(a,X)
@@ -91,8 +97,11 @@ class dataProcessor(QObject):
         #self.axis[0]=X[0]/sum1
         #self.axis[1]=X[1]/sum1
         #self.axis[2]=X[2]/sum1
-        y=np.linalg.norm(X, axis=0, keepdims=True)
-        self.axis=X/y
+        realaxis=X[0:2]
+        realaxis=np.append(realaxis, [100], axis=0)
+        #q=np.dot(np.linalg.inv(self.a),realaxis)
+        y=np.linalg.norm(realaxis, axis=0, keepdims=True)
+        self.axis=realaxis/y
         return True
 
     def get_angle(self, distances: list) -> float:
@@ -120,20 +129,22 @@ class dataProcessor(QObject):
         return angle
 
 #实例
-processor1=dataProcessor()
-a=processor1.set_calib_para({
-            "parallelRatio":[2, 2, 2],
-            "frontOffset":[2, 2, 2],
-            "xyCoordinate":[[1, 2], [10, 14], [25, 26]]
+if __name__ == "__main__":
+
+    processor1=dataProcessor()
+    a=processor1.set_calib_para({
+            "parallelRatio":[1, 1, 1],
+            "frontOffset":[0, 0, 0],
+            "xyCoordinate":[[0, 0], [0, 1], [1, 0]]
         })
-print(a)
-b=processor1.get_corrected_distances([1,1,1])
-print(b)
-c=processor1.get_vector([4,8,10])
-print(c)
-d=processor1.set_zero([1,5,6])
-print(d)
-e=processor1.set_axis([[1,1,3],[4,5,6],[1,2,4],[7,8,6]])
-print(e)
-f=processor1.get_angle([4,8,10])
-print(f)
+    print(a)
+    b=processor1.get_corrected_distances([1,1,1])
+    print(b)
+    c=processor1.get_vector([1,1,1])
+    print(c)
+    d=processor1.set_zero([1,1,1])
+    print(d)
+    e=processor1.set_axis([[1.02,1,0.98],[1.01,0,0.99],[0.998,2,1.01],[1.01,3,0.997],[1.004,-1,0.996]])
+    print(e)
+    f=processor1.get_angle([1,2,1])
+    print(f)
