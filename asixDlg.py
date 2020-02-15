@@ -53,6 +53,11 @@ class axisDlg(QDialog):
         self.deleteButton.setObjectName("deleteButton")
         self.deleteButton.clicked.connect(self.delete)
 
+        self.clearButton = QPushButton(self)
+        self.clearButton.setGeometry(QRect(380, 130, 93, 28))
+        self.clearButton.setObjectName("clearButton")
+        self.clearButton.clicked.connect(self.clear)
+
         self.okButton = QPushButton(self)
         self.okButton.setGeometry(QRect(120, 290, 93, 28))
         self.okButton.setObjectName("okButton")
@@ -72,6 +77,7 @@ class axisDlg(QDialog):
         self.setWindowTitle(_translate("axisDlg", "旋转轴标定"))
         self.addButton.setText(_translate("axisDlg", "添加"))
         self.deleteButton.setText(_translate("axisDlg", "删除"))
+        self.clearButton.setText(_translate("axisDlg", "清空"))
         self.okButton.setText(_translate("axisDlg", "确定"))
         self.cancelButton.setText(_translate("axisDlg", "取消"))
 
@@ -87,6 +93,10 @@ class axisDlg(QDialog):
             self.listWidget.takeItem(row)
             self.points.pop(row)
         # print(self.points)
+
+    def clear(self):
+        self.listWidget.clear()
+        self.points.clear()
 
     def cancel(self):
         self.close()
