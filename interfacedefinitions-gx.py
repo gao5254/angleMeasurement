@@ -111,3 +111,27 @@ class lineChartWgt(object):
         供主程序调用，传入时间和角度，进行绘图，返回接收成功
         '''
         pass
+
+# 高旭的文件写入类
+class csvWriter(object):
+
+    def start_writing(self) -> bool:
+        '''接口函数，选择文件路径，并打开文件准备写入
+
+        供主程序调用，返回打开文件是否成功
+        '''
+        pass
+
+    def write_distances(self, curTime: int, distances: list, curAngle: float) -> bool:
+        '''接口函数，在指定文件写入一行数据，包括当前时间，三个距离值，以及角度值
+
+        供主程序调用，返回写入是否成功
+        '''
+        pass
+
+    def stop_writing(self) -> bool:
+        '''接口函数，停止写入，关闭文件
+
+        供主程序调用，返回关闭是否成功
+        '''
+        pass
