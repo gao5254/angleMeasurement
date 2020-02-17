@@ -5,10 +5,9 @@ Created on Tue Feb  4 22:09:45 2020
 @author: kami
 """
 from ui import Ui_MainWindow
-import dataPrpcessor                    
-import hdwareConnector 
+import dataProcessor                    
+import HDwareConnector 
 import asixDlg
-# import lineChartWgt
 import csvwriter
 
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox
@@ -24,13 +23,10 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         self.timestatus = 3000 
 
         # 重写成员变量
-        self.hdweConnector = hdwareConnector.hdwareConnector()
-        self.dataProcessor = dataPrpcessor.dataPrpcessor()
+        self.hdweConnector = HDwareConnector.hdwareConnector()
+        self.dataProcessor = dataProcessor.dataProcessor()
         self.axisCalib = asixDlg.axisDlg()
-        self.datasaver = csvwriter.csvWriter(self)
-        self.lineChartWgt = self.widget
-        # 在ui中导入并提升至lineChartWgt类（命名为self.widget）         
-        # self.lineChartWgt = lineChartWgt.lineChartWgt()  
+        self.datasaver = csvwriter.csvWriter(self) 
         
         # 信号
         self.hdweConnector.openFinished.connect(self.Signal_portFin)
@@ -54,7 +50,9 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         
         # 标定激光器参数
         # 测试用例
-        testDict = {1:"123","name":"zhangsan","height":180}
+        testDict = {"parallelRatio":[1, 1, 1],
+                    "frontOffset":[1, 1, 1],
+                    "xyCoordinate":[[0, 0], [0, 1], [1, 0]]}
         testJson = json.dumps(testDict)
         with open("..\\calibPara.json",'w') as write_f:
             write_f.write(testJson)

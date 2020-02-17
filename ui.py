@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -63,9 +61,9 @@ class Ui_MainWindow(object):
         self.lab_staticMeas.setAlignment(QtCore.Qt.AlignCenter)
         self.lab_staticMeas.setObjectName("lab_staticMeas")
         self.gridLayout.addWidget(self.lab_staticMeas, 2, 0, 1, 1)
-        self.widget = lineChartWgt(self.tabWidgetPage1)
-        self.widget.setObjectName("widget")
-        self.gridLayout.addWidget(self.widget, 6, 0, 1, 1)
+        self.lineChartWgt = lineChartWgt(self.tabWidgetPage1)
+        self.lineChartWgt.setObjectName("lineChartWgt")
+        self.gridLayout.addWidget(self.lineChartWgt, 6, 0, 1, 1)
         self.gridLayout.setRowStretch(0, 5)
         self.gridLayout.setRowStretch(1, 10)
         self.gridLayout.setRowStretch(2, 5)
@@ -187,7 +185,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "角度测量"))
         self.lab_dynaMeas.setText(_translate("MainWindow", "动态测量结果"))
         self.lab_dist.setText(_translate("MainWindow", "激光器读数：距离/mm"))
         self.lab_staticMeas.setText(_translate("MainWindow", "静态测量结果：角度/°"))
@@ -201,4 +199,5 @@ class Ui_MainWindow(object):
         self.btn_dynaMeas.setText(_translate("MainWindow", "动态测量"))
         self.checkbox_save.setText(_translate("MainWindow", "保存至文件"))
         self.tabWidget_1.setTabText(self.tabWidget_1.indexOf(self.tab), _translate("MainWindow", "控制"))
+
 from lineChartWgt import lineChartWgt

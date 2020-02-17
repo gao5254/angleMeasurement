@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>角度测量</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="5,1">
@@ -87,7 +87,7 @@
          </widget>
         </item>
         <item row="6" column="0">
-         <widget class="lineChartWgt" name="widget" native="true"/>
+         <widget class="lineChartWgt" name="lineChartWgt" native="true"/>
         </item>
        </layout>
       </widget>
