@@ -2,11 +2,13 @@
 
 # Form implementation generated from reading ui file 'ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.9.2
+# Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -25,16 +27,23 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.lcdnum_dist1 = QtWidgets.QLCDNumber(self.tabWidgetPage1)
+        self.lcdnum_dist1.setSmallDecimalPoint(True)
+        self.lcdnum_dist1.setDigitCount(7)
         self.lcdnum_dist1.setObjectName("lcdnum_dist1")
         self.horizontalLayout_2.addWidget(self.lcdnum_dist1)
-        self.lcdnum_dist3 = QtWidgets.QLCDNumber(self.tabWidgetPage1)
-        self.lcdnum_dist3.setObjectName("lcdnum_dist3")
-        self.horizontalLayout_2.addWidget(self.lcdnum_dist3)
         self.lcdnum_dist2 = QtWidgets.QLCDNumber(self.tabWidgetPage1)
+        self.lcdnum_dist2.setSmallDecimalPoint(True)
+        self.lcdnum_dist2.setDigitCount(7)
         self.lcdnum_dist2.setObjectName("lcdnum_dist2")
         self.horizontalLayout_2.addWidget(self.lcdnum_dist2)
+        self.lcdnum_dist3 = QtWidgets.QLCDNumber(self.tabWidgetPage1)
+        self.lcdnum_dist3.setSmallDecimalPoint(True)
+        self.lcdnum_dist3.setDigitCount(7)
+        self.lcdnum_dist3.setObjectName("lcdnum_dist3")
+        self.horizontalLayout_2.addWidget(self.lcdnum_dist3)
         self.gridLayout.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
         self.lcdnum_staticMeas = QtWidgets.QLCDNumber(self.tabWidgetPage1)
+        self.lcdnum_staticMeas.setSmallDecimalPoint(True)
         self.lcdnum_staticMeas.setObjectName("lcdnum_staticMeas")
         self.gridLayout.addWidget(self.lcdnum_staticMeas, 3, 0, 1, 1)
         self.lab_dynaMeas = QtWidgets.QLabel(self.tabWidgetPage1)
@@ -172,7 +181,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setStretch(1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 986, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 986, 23))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -199,5 +208,4 @@ class Ui_MainWindow(object):
         self.btn_dynaMeas.setText(_translate("MainWindow", "动态测量"))
         self.checkbox_save.setText(_translate("MainWindow", "保存至文件"))
         self.tabWidget_1.setTabText(self.tabWidget_1.indexOf(self.tab), _translate("MainWindow", "控制"))
-
 from lineChartWgt import lineChartWgt

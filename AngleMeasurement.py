@@ -4,17 +4,19 @@ Created on Tue Feb  4 22:09:45 2020
 
 @author: kami
 """
-from ui import Ui_MainWindow
-import dataProcessor                    
-import HDwareConnector 
+import json
+import sys
+import time
+
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
+
 import asixDlg
 import csvwriter
+import dataProcessor
+import HDwareConnector
+from ui import Ui_MainWindow
 
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox
-from PyQt5.QtCore import QTimer
-import sys
-import json
-import time    
 
 class MyMainWindow(QMainWindow,Ui_MainWindow):  
     def __init__(self,parent=None): 
@@ -50,19 +52,19 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         
         # 标定激光器参数
         # 测试用例
-        testDict = {"parallelRatio":[1, 1, 1],
-                    "frontOffset":[1, 1, 1],
-                    "xyCoordinate":[[0, 0], [0, 1], [1, 0]]}
-        testJson = json.dumps(testDict)
-        with open("..\\calibPara.json",'w') as write_f:
-            write_f.write(testJson)
-            write_f.close()
+        # testDict = {"parallelRatio":[1, 1, 1],
+        #             "frontOffset":[1, 1, 1],
+        #             "xyCoordinate":[[0, 0], [0, 1], [1, 0]]}
+        # testJson = json.dumps(testDict)
+        # with open("..\\calibPara.json",'w') as write_f:
+        #     write_f.write(testJson)
+        #     write_f.close()
 
-        with open("..\\calibPara.json",'r') as load_f:
+        with open("calibPara.json",'r') as load_f:
             load_dict = json.load(load_f)
         if self.dataProcessor.set_calib_para(load_dict): 
             self.btn_open.setEnabled(True)
-            self.statusBar().showMessage('成功标定激光器参数',self.timestatus)
+            self.statusBar().showMessage('成功获取激光器参数',self.timestatus)
         else: QMessageBox.critical(self, '错误提示','激光器标定失败')
         
         
@@ -94,17 +96,18 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
             self.statusBar().showMessage('成功连接设备',self.timestatus)
             self.btn_close.setEnabled(True) 
             self.btn_axis.setEnabled(True) 
-            self.timer_showDist.start(2000)
-        else: QMessageBox.critical(self, '错误提示','硬件连接失败')
+            self.timer_showDist.start(500)
+        else: 
+            QMessageBox.critical(self, '错误提示','硬件连接失败')
     
     def Show_Dist(self):
         '''
         实时显示激光位移器距离读数
         '''          
         [time,distances] = self.hdweConnector.get_distances()
-        self.lcdnum_dist1.display(distances[0])
-        self.lcdnum_dist2.display(distances[1])
-        self.lcdnum_dist3.display(distances[2])        
+        self.lcdnum_dist1.display('{: 7.4f}'.format(distances[0]))
+        self.lcdnum_dist2.display('{: 7.4f}'.format(distances[1]))
+        self.lcdnum_dist3.display('{: 7.4f}'.format(distances[2]))
    
     def Set_Axis(self):
         '''

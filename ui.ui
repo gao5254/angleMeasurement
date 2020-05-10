@@ -25,18 +25,43 @@
         <item row="1" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QLCDNumber" name="lcdnum_dist1"/>
+           <widget class="QLCDNumber" name="lcdnum_dist1">
+            <property name="smallDecimalPoint">
+             <bool>true</bool>
+            </property>
+            <property name="digitCount">
+             <number>7</number>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="lcdnum_dist3"/>
+           <widget class="QLCDNumber" name="lcdnum_dist2">
+            <property name="smallDecimalPoint">
+             <bool>true</bool>
+            </property>
+            <property name="digitCount">
+             <number>7</number>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="lcdnum_dist2"/>
+           <widget class="QLCDNumber" name="lcdnum_dist3">
+            <property name="smallDecimalPoint">
+             <bool>true</bool>
+            </property>
+            <property name="digitCount">
+             <number>7</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
         <item row="3" column="0">
-         <widget class="QLCDNumber" name="lcdnum_staticMeas"/>
+         <widget class="QLCDNumber" name="lcdnum_staticMeas">
+          <property name="smallDecimalPoint">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="lab_dynaMeas">
@@ -277,7 +302,7 @@
      <x>0</x>
      <y>0</y>
      <width>986</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

@@ -1,5 +1,5 @@
-# import pyMT3 as mt
-import fakeMT as mt
+import pyMT3 as mt
+# import fakeMT as mt
 import time
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex, QObject
 
@@ -23,6 +23,8 @@ class MyThread(QThread):
         # 通信句柄，index
         self.handle = 0.0
         self.ind = 0
+        # 设备连接状态
+        self.isConnecting = False
 
     def run(self):
         while self.isScanning:
@@ -47,9 +49,11 @@ class MyThread(QThread):
         if err == 0:
             # self.openFinished.emit(openedNum)
             # self.beginTime = time.time()
+            self.isConnecting = True
             return True
         else:
-            self.errorHappened.emit(err)
+            self.isConnecting = False
+            # self.errorHappened.emit(err)
             return False
 
     def my_start(self):
@@ -84,7 +88,15 @@ class MyThread(QThread):
         :return: 
         """
         self.isScanning = False
-        mt.close_device(self.handle)
+        # mt.close_device(self.handle)
+
+    def my_close(self):
+        """
+        关闭设备，返回true/false
+        """
+        if self.isConnecting:
+            mt.close_device(self.handle)
+            self.isConnecting = False
 
 class hdwareConnector(QObject):
 
@@ -128,7 +140,6 @@ class hdwareConnector(QObject):
         #     return False
         for i in range(3):
             if not self.threads[i].my_open_device(portNum[i], i):
-                self.close_devices()
                 return False
         for i in range(3):
             if not self.threads[i].my_start():
@@ -162,7 +173,8 @@ class hdwareConnector(QObject):
         """
         for i in range(3):
             self.threads[i].my_end()
-            self.threads[i].quit()
+            self.threads[i].wait()
+            self.threads[i].my_close()
 
         return True
 
@@ -172,7 +184,8 @@ if __name__ == "__main__":
     myConnector.open_devices([4,5,6])
     thistime = time.time()
     for i in range(100):
-        myConnector.get_distances()
+        res =myConnector.get_distances()
+        # print(res)
     thattime = time.time()
     print(thattime - thistime)
     myConnector.close_devices()
