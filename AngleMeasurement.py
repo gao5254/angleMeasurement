@@ -28,8 +28,8 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         self.hdweConnector = HDwareConnector.hdwareConnector()
         self.dataProcessor = dataProcessor.dataProcessor()
         self.axisCalib = asixDlg.axisDlg()
-        self.datasaver = csvwriter.csvWriter(self) 
-        
+        self.datasaver = csvwriter.csvWriter(self)
+
         # 信号
         self.hdweConnector.openFinished.connect(self.Signal_portFin)
         self.hdweConnector.errorOccured.connect(self.Signal_hdweError)
@@ -60,7 +60,7 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         #     write_f.write(testJson)
         #     write_f.close()
 
-        with open("calibPara.json",'r') as load_f:
+        with open("calibPara.json", 'r') as load_f:
             load_dict = json.load(load_f)
         if self.dataProcessor.set_calib_para(load_dict): 
             self.btn_open.setEnabled(True)
@@ -165,7 +165,7 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
             self.btn_dynaMeas.setText('关闭动态测量') 
             self.checkbox_save.setEnabled(False)
             self.t_start = time.time()
-            self.timer_measdyna.start(100) 
+            self.timer_measdyna.start(200) 
         else:
             # 弹起状态，关闭定时器
             self.btn_dynaMeas.setText('动态测量')

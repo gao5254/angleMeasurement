@@ -4,7 +4,7 @@ from ctypes import *
 MT3_TEXT_SIZE = 64
 
 # load dll
-MT3dll = windll.LoadLibrary("MT3DLL64.dll")
+MT3dll = windll.LoadLibrary("./MT3DLL64.dll")
 
 # =====================================================================
 #  Function Prototypes
