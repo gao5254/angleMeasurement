@@ -312,7 +312,8 @@ class lineChartWgt(QChartView):
 
         self.updateAxis(minX=self.minX, axisXRange=self.axisXRange,
                         minY=self.minY, axisYRange=self.axisYRange,
-                        axisXTickCount=11, axisYTickCount=11)
+                        axisXTickCount=self.axisXTickCount,
+                        axisYTickCount=self.axisYTickCount)
 
 
 if __name__ == '__main__':
