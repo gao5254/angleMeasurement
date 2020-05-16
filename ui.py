@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -55,6 +55,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.lineChartWgt, 6, 0, 1, 1)
         self.lcdnum_staticMeas = QtWidgets.QLCDNumber(self.tabWidgetPage1)
         self.lcdnum_staticMeas.setSmallDecimalPoint(True)
+        self.lcdnum_staticMeas.setDigitCount(7)
         self.lcdnum_staticMeas.setObjectName("lcdnum_staticMeas")
         self.gridLayout.addWidget(self.lcdnum_staticMeas, 4, 0, 1, 1)
         self.lab_dist = QtWidgets.QLabel(self.tabWidgetPage1)

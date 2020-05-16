@@ -121,14 +121,14 @@ class axisDlg(QDialog):
         接口函数，接受距离列表
         供主程序调用，传入距离列表，显示并记录在类内部，返回设置成功
         '''
-        string = "{:>10.3f}, {:>10.3f}, {:>10.3f}".format(distances[0], distances[1], distances[2])
+        string = "{:>10.4f}, {:>10.4f}, {:>10.4f}".format(distances[0], distances[1], distances[2])
         self.points.append(distances)
         self.listWidget.addItem(string)
         # print(self.points)
 
     def finish(self):
         # print("gatherFinished")
-        if len(self.points) < 3:
+        if len(self.points) < 4:
             reply = QMessageBox.warning(self, "警告", "数据少于三个。", QMessageBox.Close, QMessageBox.Close)
         else:
             self.gatherFinished.emit(self.points)
