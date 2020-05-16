@@ -320,8 +320,15 @@ def close_device(handle):
     返回错误代码
     '''
     handle = c_ulonglong(handle)
-    err = CloseInterface(byref(handle));
+    err = CloseInterface(byref(handle))
     return err
 
+def turnonoff_device(handle, deviceIndex, laserOnOff):
+    '''打开或关闭激光器光点
+
+    返回错误代码
+    '''
+    err = SetLaserPower(handle, deviceIndex, laserOnOff)
+    return err
 
     

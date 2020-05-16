@@ -1,6 +1,6 @@
 import pyMT3 as mt
 # import fakeMT as mt
-import time
+
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex, QObject
 
 class MyThread(QThread):
@@ -25,6 +25,8 @@ class MyThread(QThread):
         self.ind = 0
         # 设备连接状态
         self.isConnecting = False
+        # 光点打开状态
+        self.isTurnOn = True
 
     def run(self):
         while self.isScanning:
@@ -35,8 +37,11 @@ class MyThread(QThread):
                 self.readingTime = time.time()
                 self.threadLock.unlock()
             else:
-                self.errorHappened.emit(err)
-                break
+                if ~self.isTurnOn:
+                    continue
+                else:
+                    self.errorHappened.emit(err)
+                    break
 
     def my_open_device(self, portNum, openedNum):
         """
@@ -78,7 +83,7 @@ class MyThread(QThread):
 
     # def my_unlock(self):
     #     """
-    #     关闭线程锁 
+    #     关闭线程锁
     #     """
     #     self.threadLock.unlock()
 
@@ -97,6 +102,18 @@ class MyThread(QThread):
         if self.isConnecting:
             mt.close_device(self.handle)
             self.isConnecting = False
+
+    def my_turn_onoff(self, onOff):
+        if self.isConnecting:
+            err = mt.turnonoff_device(self.handle, self.ind, onOff)
+            if err != 0:
+                self.errorHappened.emit(err)
+                return False
+            else:
+                self.isTurnOn = bool(onOff)
+                return True
+        else:
+            return False
 
 class hdwareConnector(QObject):
 
@@ -178,14 +195,41 @@ class hdwareConnector(QObject):
 
         return True
 
+    def turnonoff_laser(self, ind, onOff):
+        '''接口函数，打开或关闭某个激光器光点
+
+        ind标识激光器编号（0，1，2），onOff标识打开或关闭（false关闭，true打开）
+        返回是否成功
+        '''
+        return self.threads[ind].my_turn_onoff(int(onOff))
+
 
 if __name__ == "__main__":
+    import time
     myConnector = hdwareConnector()
-    myConnector.open_devices([4,5,6])
+    myConnector.open_devices([3, 4, 5])
     thistime = time.time()
-    for i in range(100):
-        res =myConnector.get_distances()
-        # print(res)
+    for i in range(5):
+        time.sleep(0.5)
+        res = myConnector.get_distances()
+        print(res)
+    print('\n\n')
+    time.sleep(1)
+    myConnector.turnonoff_laser(0,False)
+    time.sleep(2)
+    for i in range(10):
+        time.sleep(0.5)
+        res = myConnector.get_distances()
+        print(res)
+    print('\n\n')
+    print(myConnector.threads[0].isRunning())
+    print(myConnector.turnonoff_laser(0, True))
+    time.sleep(1)
+    for i in range(10):
+        time.sleep(0.5)
+        res = myConnector.get_distances()
+        print(res)
+
     thattime = time.time()
     print(thattime - thistime)
     myConnector.close_devices()
