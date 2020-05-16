@@ -41,7 +41,7 @@ class ToolTipWidget(QWidget):
         layout.addWidget(self.titleLabel)
 
     def updateUi(self, title, points):
-        if title == None:
+        if title is None:
             self.titleLabel.hide()
         else:
             self.titleLabel.setText(title)
@@ -85,9 +85,8 @@ class lineChartWgt(QChartView):
         self.dataX = []
         self.leftClicked = False
 
-
-    def updateAxis(self, minX=0, axisXRange=5, minY=0, axisYRange=180,
-                   axisXTickCount=11, axisYTickCount=11):
+    def updateAxis(self, minX=0, axisXRange=5, minY=-5, axisYRange=10,
+                   axisXTickCount=11, axisYTickCount=3):
         self.axisXRange = axisXRange
         self.axisYRange = axisYRange
         self.axisXTickCount = axisXTickCount
@@ -106,7 +105,6 @@ class lineChartWgt(QChartView):
         self.axisY.setTickCount(self.axisYTickCount)  # y轴设置刻度
 
         self.locate()
-
 
     def initChart(self):
         self._chart = QChart()
@@ -144,23 +142,43 @@ class lineChartWgt(QChartView):
         self.lineItem.setZValue(998)
         self.lineItem.hide()
 
-
     def add_angle(self, curTime: int, curAngle: float) -> bool:
         '''
         接口函数，接收一个新角度，并进行绘图
         供主程序调用，传入时间和角度，进行绘图，返回接收成功
         '''
-        if curTime > self.axisXRange:
-            maxX = (curTime // self.axisXStep + 1) * self.axisXStep
-            if maxX > self.maxX:
-                self.maxX = maxX
-                self.minX = maxX-self.axisXRange
-                self.axisX.setRange(self.minX, self.maxX)
+        updateAxisFlag = False
+        # if curTime > self.axisXRange:
+        maxX = (curTime // self.axisXStep + 2) * self.axisXStep
+        if maxX > self.maxX:
+            # self.maxX = maxX
+            self.minX = maxX - self.axisXRange
+            # self.axisX.setRange(self.minX, self.maxX)
+            updateAxisFlag = True
+
+        if curAngle > 0:
+            jumpStep = curAngle // self.axisYStep + 1
+            maxY = jumpStep * self.axisYStep
+            if maxY > self.maxY:
+                self.axisYRange = maxY - self.minY
+                self.axisYTickCount = int(self.axisYRange / self.axisYStep + 1)
+                updateAxisFlag = True
+        elif curAngle < 0:
+            jumpStep = curAngle // self.axisYStep - (0 if curAngle % self.axisYStep != 0 else 1)
+            minY = jumpStep * self.axisYStep
+            if minY < self.minY:
+                self.minY = minY
+                self.axisYRange = self.maxY - minY
+                self.axisYTickCount = int(self.axisYRange / self.axisYStep + 1)
+                updateAxisFlag = True
+
+        if updateAxisFlag:
+            self.updateAxis(self.minX, self.axisXRange, self.minY, self.axisYRange, self.axisXTickCount, self.axisYTickCount)
+
         self.serie.append(curTime, curAngle)
         self.dataX.append(curTime)
         # print(self.dataX)
         return True
-
 
     def clearSeries(self):
         for serie in self._chart.series():
@@ -168,12 +186,10 @@ class lineChartWgt(QChartView):
         self.dataX = []
         self.updateAxis()
 
-
     def resizeEvent(self, event):
         super(lineChartWgt, self).resizeEvent(event)
         # 当窗口大小改变时需要重新计算
         self.locate()
-
 
     def locate(self):
         self.pointLeftTop = self._chart.mapToPosition(
@@ -182,9 +198,28 @@ class lineChartWgt(QChartView):
             QPointF(self.minX, self.minY))
         self.pointRightBottom = self._chart.mapToPosition(
             QPointF(self.maxX, self.minY))
-        self.xValuePerPos = (self.maxX - self.minX) / (self.pointRightBottom.x() - self.pointLeftBottom.x())
-        self.yValuePerPos = (self.maxY - self.minY) / (self.pointLeftTop.y() - self.pointLeftBottom.y())
+        self.xValuePerPos = (self.maxX - self.minX) / \
+            (self.pointRightBottom.x() - self.pointLeftBottom.x())
+        self.yValuePerPos = (self.maxY - self.minY) / \
+            (self.pointLeftTop.y() - self.pointLeftBottom.y())
 
+    def searchIndex(self, arr, left, right, x):
+        # 二分查找
+        # 基本判断
+        if right >= left:
+            mid = int(left + (right - left) / 2)
+            # 元素整好的中间位置
+            if arr[mid] == x:
+                return mid
+            # 元素小于中间位置的元素，只需要再比较左边的元素
+            elif arr[mid] > x:
+                return self.searchIndex(arr, left, mid - 1, x)
+            # 元素大于中间位置的元素，只需要再比较右边的元素
+            else:
+                return self.searchIndex(arr, mid + 1, right, x)
+        else:
+            # 不存在
+            return left
 
     def mouseMoveEvent(self, event):
         super(lineChartWgt, self).mouseMoveEvent(event)
@@ -194,22 +229,26 @@ class lineChartWgt(QChartView):
         yValue = valuePos.y()
         points = []
         if self.dataX:
-            for index, data_x in enumerate(self.dataX):
-                if data_x >= xValue:
-                    break
-            if  index != 0:
-                a = xValue-self.dataX[index-1]
-                b = self.dataX[index]-xValue
+            # 二分查找比xValue大的index
+            index = self.searchIndex(self.dataX, 0, len(self.dataX) - 1, xValue)
+            # for index, data_x in enumerate(self.dataX):
+            #     if data_x >= xValue:
+            #         break
+            if index == len(self.dataX):
+                index -= 1
+            # 判断靠近左边还是右边的点
+            if index != 0:
+                a = xValue - self.dataX[index - 1]
+                b = self.dataX[index] - xValue
                 if a < b:
                     index -= 1
             # 得到在坐标系中的所有正常显示的series的类型和点
-            # print(index)
             for serie in self._chart.series():
                 point = serie.at(index)
-                if abs(point.x()-xValue)<self.axisXStep and \
-                      abs(point.y()-yValue)<self.axisYStep and \
-                      self.minX <= xValue <= self.maxX and \
-                      self.minY <= yValue <= self.maxY:
+                # abs(point.y() - yValue) < self.axisYStep and \
+                if abs(point.x() - xValue) < self.axisXStep and \
+                    self.minX <= xValue <= self.maxX and \
+                        self.minY <= yValue <= self.maxY:
                     points.append((serie, point))
 
         if points:
@@ -241,7 +280,6 @@ class lineChartWgt(QChartView):
             self.axisY.setRange(self.minY, self.maxY)
             self._startPos = event.pos()
 
-
     def mousePressEvent(self, event):
         super(lineChartWgt, self).mousePressEvent(event)
         if event.button() == Qt.LeftButton:
@@ -249,13 +287,11 @@ class lineChartWgt(QChartView):
             self._startPos = event.pos()
             # print("left", self.leftClicked)
 
-
     def mouseReleaseEvent(self, event):
         super(lineChartWgt, self).mouseReleaseEvent(event)
         if event.button() == Qt.LeftButton:
             self.leftClicked = False
             # print("left", self.leftClicked)
-
 
     def wheelEvent(self, event):
         super(lineChartWgt, self).wheelEvent(event)
@@ -283,32 +319,48 @@ if __name__ == '__main__':
     import sys
     from random import randint
     import time
-
+    from PyQt5.QtCore import QTimer
 
     # 调用示例
+
     class WindowClass(QWidget):
         def __init__(self):
             super().__init__()
-            layout=QVBoxLayout()
+            layout = QVBoxLayout()
             self.chart = lineChartWgt()
             # self.resize(500,500)
             self.chart.setMinimumSize(800, 600)
             layout.addWidget(self.chart)
 
-            self.btn = QPushButton()
-            self.btn.setText("添加")
-            self.btn.clicked.connect(self.add)
-            layout.addWidget(self.btn)
-            self.btn1 = QPushButton()
-            self.btn1.setText("清空")
-            self.btn1.clicked.connect(self.clear)
-            layout.addWidget(self.btn1)
+            self.btnStart = QPushButton()
+            self.btnStart.setText("开始")
+            self.btnStart.clicked.connect(self.start)
+            layout.addWidget(self.btnStart)
+
+            self.btnPause = QPushButton()
+            self.btnPause.setText("暂停")
+            self.btnPause.clicked.connect(self.pause)
+            layout.addWidget(self.btnPause)
+
+            self.btnClear = QPushButton()
+            self.btnClear.setText("清空")
+            self.btnClear.clicked.connect(self.clear)
+            layout.addWidget(self.btnClear)
             self.setLayout(layout)
 
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self.add)
+
+        def start(self):
+            self.timer.start(100)
             self.t_start = time.time()
 
+        def pause(self):
+            self.timer.stop()
+
         def add(self):
-            flag = self.chart.add_angle(time.time()-self.t_start, randint(80, 120))
+            flag = self.chart.add_angle(
+                time.time() - self.t_start, randint(-30, 30))
             print(flag)
 
         def clear(self):
