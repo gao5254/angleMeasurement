@@ -2,7 +2,7 @@
 
 
 from PyQt5.QtCore import pyqtSignal, QRect, QMetaObject, QCoreApplication
-from PyQt5.QtWidgets import QDialog, QListWidget, QPushButton, QMessageBox, QWidget, QVBoxLayout, QApplication
+from PyQt5.QtWidgets import QDialog, QListWidget, QPushButton, QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QApplication
 
 
 class axisDlg(QDialog):
@@ -38,39 +38,54 @@ class axisDlg(QDialog):
 
     def setupUi(self):
         self.setObjectName("axisDlg")
-        self.resize(500, 350)
+        self.setMinimumSize(410, 330)
+        # self.resize(410, 330)
+
+        self.HLayout = QHBoxLayout()
+        self.VLayout = QVBoxLayout()
+
         self.listWidget = QListWidget(self)
-        self.listWidget.setGeometry(QRect(10, 10, 350, 260))
+        # self.listWidget.setGeometry(QRect(10, 10, 280, 260))
         self.listWidget.setObjectName("listView")
+        self.HLayout.addWidget(self.listWidget)
+        self.HLayout.addSpacing(15)
 
         self.addButton = QPushButton(self)
-        self.addButton.setGeometry(QRect(380, 30, 93, 28))
+        # self.addButton.setGeometry(QRect(305, 30, 93, 28))
         self.addButton.setObjectName("addButton")
         self.addButton.clicked.connect(self.add)
+        self.VLayout.addWidget(self.addButton)
 
         self.deleteButton = QPushButton(self)
-        self.deleteButton.setGeometry(QRect(380, 80, 93, 28))
+        # self.deleteButton.setGeometry(QRect(305, 80, 93, 28))
         self.deleteButton.setObjectName("deleteButton")
         self.deleteButton.clicked.connect(self.delete)
+        self.VLayout.addWidget(self.deleteButton)
 
         self.clearButton = QPushButton(self)
-        self.clearButton.setGeometry(QRect(380, 130, 93, 28))
+        # self.clearButton.setGeometry(QRect(305, 130, 93, 28))
         self.clearButton.setObjectName("clearButton")
         self.clearButton.clicked.connect(self.clear)
+        self.VLayout.addWidget(self.clearButton)
 
         self.okButton = QPushButton(self)
-        self.okButton.setGeometry(QRect(120, 290, 93, 28))
+        # self.okButton.setGeometry(QRect(90, 290, 93, 28))
         self.okButton.setObjectName("okButton")
         self.okButton.clicked.connect(self.finish)
+        self.VLayout.addWidget(self.okButton)
 
         self.cancelButton = QPushButton(self)
-        self.cancelButton.setGeometry(QRect(270, 290, 93, 28))
+        # self.cancelButton.setGeometry(QRect(240, 290, 93, 28))
         self.cancelButton.setObjectName("cancelButton")
         self.cancelButton.clicked.connect(self.cancel)
+        self.VLayout.addWidget(self.cancelButton)
+
+        self.HLayout.addLayout(self.VLayout)
+        self.HLayout.addSpacing(5)
+        self.setLayout(self.HLayout)
 
         self.retranslateUi()
         QMetaObject.connectSlotsByName(self)
-
 
     def retranslateUi(self):
         _translate = QCoreApplication.translate
@@ -106,8 +121,9 @@ class axisDlg(QDialog):
         接口函数，接受距离列表
         供主程序调用，传入距离列表，显示并记录在类内部，返回设置成功
         '''
+        string = "{:>10.3f}, {:>10.3f}, {:>10.3f}".format(distances[0], distances[1], distances[2])
         self.points.append(distances)
-        self.listWidget.addItem(str(distances))
+        self.listWidget.addItem(string)
         # print(self.points)
 
     def finish(self):
@@ -121,7 +137,8 @@ class axisDlg(QDialog):
 
 if __name__ == '__main__':
     import sys
-    from random import randint
+    from random import random
+
     # 调用示例
     class WindowClass(QWidget):
         def __init__(self):
@@ -130,7 +147,7 @@ if __name__ == '__main__':
             self.btn = QPushButton()
             self.btn.setText("打开对话框")
             self.btn.clicked.connect(self.showDialog)
-            self.resize(500,500)
+            self.resize(500, 500)
             layout.addWidget(self.btn)
             self.setLayout(layout)
 
@@ -142,16 +159,15 @@ if __name__ == '__main__':
 
         def set_distances(self):
             print("distancesNeeded")
-            self.dialog.set_distances([randint(0,10), randint(0,10), randint(0,10)])
+            self.dialog.set_distances([random(), random(), random()])
 
         def finished(self, alist):
             print("gatherFinished")
             print(alist)
 
-
     try:
-        app=QApplication(sys.argv)
-        win=WindowClass()
+        app = QApplication(sys.argv)
+        win = WindowClass()
         win.show()
         sys.exit(app.exec_())
     finally:
