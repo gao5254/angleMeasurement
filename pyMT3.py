@@ -1,4 +1,5 @@
-from ctypes import *
+from ctypes import (POINTER, byref, c_char_p, c_float, c_int32, c_uint32,
+                    c_ulonglong, windll)
 
 # macro
 MT3_TEXT_SIZE = 64
@@ -285,8 +286,9 @@ GetTelemetry.argtypes = (c_ulonglong, c_int32, POINTER(c_float), POINTER(c_uint3
 # MT3_StopTelemetry
 # MT3_TriggerTelemetryReading
 
+
 # define by gaoxu
-def open_device(portNumber, deviceAddress = 0, baudRate = 57600):
+def open_device(portNumber, deviceAddress=0, baudRate=57600):
     '''打开一个串口上的MT3激光位移计设备。
 
     返回其错误代码，串口句柄及设备编号。
@@ -314,6 +316,7 @@ def get_number(handle, deviceIndex):
     err = GetTelemetry(handle, deviceIndex, byref(reading), byref(status))
     return (err, reading.value, status.value)
 
+
 def close_device(handle):
     '''关闭串口及其关联设备
 
@@ -323,6 +326,7 @@ def close_device(handle):
     err = CloseInterface(byref(handle))
     return err
 
+
 def turnonoff_device(handle, deviceIndex, laserOnOff):
     '''打开或关闭激光器光点
 
@@ -330,5 +334,3 @@ def turnonoff_device(handle, deviceIndex, laserOnOff):
     '''
     err = SetLaserPower(handle, deviceIndex, laserOnOff)
     return err
-
-    

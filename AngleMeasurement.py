@@ -8,9 +8,9 @@ import json
 import sys
 import time
 
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QTimer, pyqtSignal
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QMessageBox,
+                             QPushButton, QWidget)
 
 import asixDlg
 import csvwriter
@@ -18,56 +18,66 @@ import dataProcessor
 import HDwareConnector
 from ui import Ui_MainWindow
 
+# from PyQt5 import QtCore, QtGui, QtWidgets
+
+
 
 class ShowColor(QWidget):
+    # 开关激光器光点信号
+    laserTurned = pyqtSignal(int, bool)
+
     def __init__(self, parent=None):
         super(ShowColor, self).__init__(parent)
-        self.setupUi()
+        # self.setupUi()
 
     def setupUi(self):
-        _translate = QtCore.QCoreApplication.translate
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        # _translate = QtCore.QCoreApplication.translate
+        # self.horizontalLayout = QtWidgets.QHBoxLayout()
+        # self.horizontalLayout.setObjectName("horizontalLayout")
 
-        self.btn_laser_1 = QtWidgets.QPushButton(self)
-        self.btn_laser_1.setCheckable(True)
-        font = QtGui.QFont()
-        font.setFamily("宋体")
-        font.setPointSize(11)
-        self.btn_laser_1.setFont(font)
-        self.btn_laser_1.setText(_translate("horizontalLayout", "1号端口"))
-        self.btn_laser_1.setObjectName("btn_laser_1")
-        self.horizontalLayout.addWidget(self.btn_laser_1)
+        # self.btn_laser_1 = QtWidgets.QPushButton(self)
+        # self.btn_laser_1.setCheckable(True)
+        # font = QtGui.QFont()
+        # font.setFamily("宋体")
+        # font.setPointSize(11)
+        # self.btn_laser_1.setFont(font)
+        # self.btn_laser_1.setText(_translate("horizontalLayout", "1号端口"))
+        # self.btn_laser_1.setObjectName("btn_laser_1")
+        # self.horizontalLayout.addWidget(self.btn_laser_1)
 
-        self.btn_laser_2 = QtWidgets.QPushButton(self)
-        self.btn_laser_2.setCheckable(True)
-        font = QtGui.QFont()
-        font.setFamily("宋体")
-        font.setPointSize(11)
-        self.btn_laser_2.setFont(font)
-        self.btn_laser_2.setText(_translate("horizontalLayout", "2号端口"))
-        self.btn_laser_2.setObjectName("btn_laser_2")
-        self.horizontalLayout.addWidget(self.btn_laser_2)
+        # self.btn_laser_2 = QtWidgets.QPushButton(self)
+        # self.btn_laser_2.setCheckable(True)
+        # font = QtGui.QFont()
+        # font.setFamily("宋体")
+        # font.setPointSize(11)
+        # self.btn_laser_2.setFont(font)
+        # self.btn_laser_2.setText(_translate("horizontalLayout", "2号端口"))
+        # self.btn_laser_2.setObjectName("btn_laser_2")
+        # self.horizontalLayout.addWidget(self.btn_laser_2)
 
-        self.btn_laser_3 = QtWidgets.QPushButton(self)
-        self.btn_laser_3.setCheckable(True)
-        font = QtGui.QFont()
-        font.setFamily("宋体")
-        font.setPointSize(11)
-        self.btn_laser_3.setFont(font)
-        self.btn_laser_3.setText(_translate("horizontalLayout", "3号端口"))
-        self.btn_laser_3.setObjectName("btn_laser_3")
-        self.horizontalLayout.addWidget(self.btn_laser_3)
+        # self.btn_laser_3 = QtWidgets.QPushButton(self)
+        # self.btn_laser_3.setCheckable(True)
+        # font = QtGui.QFont()
+        # font.setFamily("宋体")
+        # font.setPointSize(11)
+        # self.btn_laser_3.setFont(font)
+        # self.btn_laser_3.setText(_translate("horizontalLayout", "3号端口"))
+        # self.btn_laser_3.setObjectName("btn_laser_3")
+        # self.horizontalLayout.addWidget(self.btn_laser_3)
 
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setSpacing(7)
-        self.setLayout(self.horizontalLayout)
+        # self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        # self.horizontalLayout.setSpacing(7)
+        # self.setLayout(self.horizontalLayout)
 
-        self.btn_laser = [self.btn_laser_1, self.btn_laser_2, self.btn_laser_3]
+        # self.btn_laser = [self.btn_laser_1, self.btn_laser_2, self.btn_laser_3]
+        self.btn_laser = self.findChildren(QPushButton)
 
-        self.btn_laser_1.clicked.connect(lambda: self.close_laser(0))
-        self.btn_laser_2.clicked.connect(lambda: self.close_laser(1))
-        self.btn_laser_3.clicked.connect(lambda: self.close_laser(2))
+        self.btn_laser[0].toggled.connect(
+            lambda isChecked: self.close_laser(0, isChecked))
+        self.btn_laser[1].toggled.connect(
+            lambda isChecked: self.close_laser(1, isChecked))
+        self.btn_laser[2].toggled.connect(
+            lambda isChecked: self.close_laser(2, isChecked))
 
     def set_color(self, distances):
 
@@ -88,21 +98,28 @@ class ShowColor(QWidget):
                 self.btn_laser[i].setStyleSheet(
                     "background: rgb(255,0,0)")     # red
 
-    def close_laser(self, i):
-        if self.btn_laser[i].isChecked():
+    def close_laser(self, i, isChecked):
+        # if self.btn_laser[i].isChecked():
+        #     self.btn_laser[i].setText('打开' + str(i+1) + '号端口')
+        #     # 关闭端口
+        #     print('已关闭' + str(i+1) + '号端口')
+        # else:
+        #     # 打开端口
+        #     self.btn_laser[i].setText(str(i+1) + '号端口')
+        #     print('已打开' + str(i+1) + '号端口')
+        if isChecked:
             self.btn_laser[i].setText('打开' + str(i+1) + '号端口')
-            # 关闭端口
-            print('已关闭' + str(i+1) + '号端口')
         else:
-            # 打开端口
-            self.btn_laser[i].setText(str(i+1) + '号端口')
-            print('已打开' + str(i+1) + '号端口')
+            self.btn_laser[i].setText('关闭' + str(i+1) + '号端口')
+        self.laserTurned.emit(i, ~isChecked)
 
 
 class MyMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MyMainWindow, self).__init__(parent)
         self.setupUi(self)
+        # 主窗口绘制完毕后绘制子窗口
+        self.ShowColor.setupUi()
         self.timestatus = 3000
 
         # 重写成员变量
@@ -116,6 +133,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.hdweConnector.errorOccured.connect(self.Signal_hdweError)
         self.axisCalib.distancesNeeded.connect(self.Get_Axis)
         self.axisCalib.gatherFinished.connect(self.Calc_Axis)
+        self.ShowColor.laserTurned.connect(self.hdweConnector.turnonoff_laser)
 
         # 按钮
         self.btn_open.clicked.connect(self.Open_Devices)
@@ -172,6 +190,10 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         portnumber = [self.spinbox_portNum_1.value(),
                       self.spinbox_portNum_2.value(),
                       self.spinbox_portNum_3.value()]
+        # 若数组有重复则不进行下列操作
+        if len(set(portnumber)) < 3:
+            QMessageBox.critical(self, '错误提示', '串口号有相同数字')
+            return
         # 打开设备并开启线程进行扫描
         if self.hdweConnector.open_devices(portnumber):
             self.statusBar().showMessage('成功连接设备', self.timestatus)
@@ -200,13 +222,13 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
     def Set_Axis(self):
         '''
-        旋转轴标定  
+        旋转轴标定
         '''
         self.axisCalib.show()
 
     def Get_Axis(self):
         '''
-        旋转轴标定：获取数据  
+        旋转轴标定：获取数据
         '''
         print("distancesNeeded")
         [time, distances] = self.hdweConnector.get_distances()
@@ -214,7 +236,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
     def Calc_Axis(self, twoDimenList):
         '''
-        旋转轴标定：计算过程  
+        旋转轴标定：计算过程
         '''
         print("gatherFinished")
         if self.dataProcessor.set_axis(twoDimenList):
@@ -249,11 +271,12 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         #     [time,distances] = self.hdweConnector.get_distances()
         #     dist.append(self.dataProcessor.get_angle(distances))
         # self.lcdnum_staticMeas.display('{: 7.4f}'.format(np.mean(dist)))
+
     def Meas_Dynamic(self, isChecked):
         '''
         动态测量：状态判断
         '''
-        if isChecked == True:
+        if isChecked:
             # 按下状态，开启定时器
             if self.checkbox_save.isChecked():
                 self.datasaver.start_writing()
@@ -279,7 +302,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage('正在动态测量', self.timestatus)
         [time, distances] = self.hdweConnector.get_distances()
         angle = self.dataProcessor.get_angle(distances)
-        self.lcdnum_staticMeas.display(angle)
+        self.lcdnum_staticMeas.display('{: 7.4f}'.format(angle))
+        # self.lcdnum_staticMeas.display(angle)
         self.lineChartWgt.add_angle(time-self.t_start, angle)
         if self.checkbox_save.isChecked():
             if self.datasaver.write_distances(time-self.t_start, distances, angle):

@@ -1,9 +1,12 @@
-import pyMT3 as mt
-# import fakeMT as mt
-
-from PyQt5.QtCore import QThread, pyqtSignal, QMutex, QObject
 import time
+
+from PyQt5.QtCore import QMutex, QObject, QThread, pyqtSignal
+
+import pyMT3 as mt
+
+# import fakeMT as mt
 # from random import randint
+
 
 class MyThread(QThread):
 
@@ -92,7 +95,7 @@ class MyThread(QThread):
     def my_end(self):
         """
         关闭串口
-        :return: 
+        :return:
         """
         self.isScanning = False
         # mt.close_device(self.handle)
@@ -117,13 +120,13 @@ class MyThread(QThread):
         else:
             return False
 
+
 class hdwareConnector(QObject):
 
     # 设备打开成功信号
     openFinished = pyqtSignal(int)
     # 发生错误，错误代码
     errorOccured = pyqtSignal(int)
-
 
     def __init__(self):
         super(hdwareConnector, self).__init__()
@@ -166,7 +169,6 @@ class hdwareConnector(QObject):
                 return False
             self.openFinished.emit(i+1)
         return True
-            
 
     def get_distances(self):
         """
@@ -218,7 +220,7 @@ if __name__ == "__main__":
         print(res)
     print('\n\n')
     time.sleep(1)
-    myConnector.turnonoff_laser(0,False)
+    myConnector.turnonoff_laser(0, False)
     time.sleep(2)
     for i in range(10):
         time.sleep(0.5)
@@ -236,4 +238,3 @@ if __name__ == "__main__":
     thattime = time.time()
     print(thattime - thistime)
     myConnector.close_devices()
-

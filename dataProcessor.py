@@ -1,8 +1,9 @@
-from PyQt5.QtCore import QObject
-import math
 import numpy as np
-class  dataProcessor(QObject):
-    def __init__(self):#构造函数
+from PyQt5.QtCore import QObject
+
+
+class dataProcessor(QObject):
+    def __init__(self):  # 构造函数
         self.cPara = {
             "parallelRatio": [1, 1, 1],
             "frontOffset": [1, 1, 1],
@@ -119,7 +120,8 @@ class  dataProcessor(QObject):
             angle = -1*angle
         return angle
 
-#实例
+
+# 实例
 if __name__ == "__main__":
     processor1 = dataProcessor()
     a = processor1.set_calib_para({
