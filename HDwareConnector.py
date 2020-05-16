@@ -2,6 +2,8 @@ import pyMT3 as mt
 # import fakeMT as mt
 
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex, QObject
+import time
+# from random import randint
 
 class MyThread(QThread):
 
@@ -182,6 +184,8 @@ class hdwareConnector(QObject):
         returnValue = (readingTime, distances)
 
         return returnValue
+        # 测试用例
+        # return [time.time(),[randint(80, 120),randint(80, 120),randint(80, 120)]]
 
     def close_devices(self):
         """
@@ -205,7 +209,6 @@ class hdwareConnector(QObject):
 
 
 if __name__ == "__main__":
-    import time
     myConnector = hdwareConnector()
     myConnector.open_devices([3, 4, 5])
     thistime = time.time()

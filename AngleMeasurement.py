@@ -10,6 +10,7 @@ import time
 
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import asixDlg
 import csvwriter
@@ -18,10 +19,84 @@ import HDwareConnector
 from ui import Ui_MainWindow
 
 
+class ShowColor(QWidget):
+    def __init__(self,parent=None):
+        super(ShowColor,self).__init__(parent) 
+        self.setupUi()
+
+    def setupUi(self):
+        _translate = QtCore.QCoreApplication.translate
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+
+        self.btn_laser_1 = QtWidgets.QPushButton(self)
+        self.btn_laser_1.setCheckable(True)
+        font = QtGui.QFont()
+        font.setFamily("宋体")
+        font.setPointSize(11)
+        self.btn_laser_1.setFont(font)
+        self.btn_laser_1.setText(_translate("horizontalLayout", "1号端口"))
+        self.btn_laser_1.setObjectName("btn_laser_1")
+        self.horizontalLayout.addWidget(self.btn_laser_1)
+
+        self.btn_laser_2 = QtWidgets.QPushButton(self)
+        self.btn_laser_2.setCheckable(True)
+        font = QtGui.QFont()
+        font.setFamily("宋体")
+        font.setPointSize(11)
+        self.btn_laser_2.setFont(font)
+        self.btn_laser_2.setText(_translate("horizontalLayout", "2号端口"))
+        self.btn_laser_2.setObjectName("btn_laser_2")
+        self.horizontalLayout.addWidget(self.btn_laser_2)
+        
+        self.btn_laser_3 = QtWidgets.QPushButton(self)
+        self.btn_laser_3.setCheckable(True)
+        font = QtGui.QFont()
+        font.setFamily("宋体")
+        font.setPointSize(11)
+        self.btn_laser_3.setFont(font)
+        self.btn_laser_3.setText(_translate("horizontalLayout", "3号端口"))
+        self.btn_laser_3.setObjectName("btn_laser_3")
+        self.horizontalLayout.addWidget(self.btn_laser_3)
+
+        self.horizontalLayout.setContentsMargins(0,0,0,0)
+        self.horizontalLayout.setSpacing(7)
+        self.setLayout(self.horizontalLayout)
+
+        self.btn_laser = [self.btn_laser_1, self.btn_laser_2, self.btn_laser_3]
+
+        self.btn_laser_1.clicked.connect(lambda: self.close_laser(0))
+        self.btn_laser_2.clicked.connect(lambda: self.close_laser(1))
+        self.btn_laser_3.clicked.connect(lambda: self.close_laser(2))
+
+    def set_color(self,distances):
+        
+        for i in range(3):
+            if (distances[i] > 150) and (distances[i] <= 196):
+                self.btn_laser[i].setStyleSheet("background: rgb(0,0,205)")     # indigo
+            elif (distances[i] > 196) and (distances[i] <= 204):
+                self.btn_laser[i].setStyleSheet("background: rgb(0,255,0)")     # green 
+            elif (distances[i] > 204) and (distances[i] <= 250):
+                self.btn_laser[i].setStyleSheet("background: rgb(148,0,211)")   # violet
+            elif ((distances[i] > 137.5) and (distances[i] <= 150)) or ((distances[i] > 250) and (distances[i] <= 262.5)):
+                self.btn_laser[i].setStyleSheet("background: rgb(0,255,255)")   # cyan    
+            else :
+                self.btn_laser[i].setStyleSheet("background: rgb(255,0,0)")     # red
+
+    def close_laser(self, i):
+        if self.btn_laser[i].isChecked():
+            self.btn_laser[i].setText('打开'+ str(i+1) + '号端口')
+            # 关闭端口
+            print('已关闭' +  str(i+1) + '号端口')
+        else:
+            # 打开端口
+            self.btn_laser[i].setText(str(i+1) + '号端口')
+            print('已打开' +  str(i+1) + '号端口')
+
 class MyMainWindow(QMainWindow,Ui_MainWindow):  
     def __init__(self,parent=None): 
         super(MyMainWindow,self).__init__(parent)        
-        self.setupUi(self)                               
+        self.setupUi(self)  
         self.timestatus = 3000 
 
         # 重写成员变量
@@ -88,9 +163,9 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
         连接硬件设备，标定激光器参数
         ''' 
         # 读取端口号
-        portnumber = [ self.spinbox_portNum.value(),
-                       self.spinbox_portNum.value() + 1, 
-                       self.spinbox_portNum.value() + 2 ]
+        portnumber = [ self.spinbox_portNum_1.value(),
+                       self.spinbox_portNum_2.value(), 
+                       self.spinbox_portNum_3.value()]
         # 打开设备并开启线程进行扫描
         if self.hdweConnector.open_devices(portnumber):
             self.statusBar().showMessage('成功连接设备',self.timestatus)
@@ -99,12 +174,20 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
             self.timer_showDist.start(500)
         else: 
             QMessageBox.critical(self, '错误提示','硬件连接失败')
+
+        # # 测试用例
+        # self.statusBar().showMessage('成功连接设备',self.timestatus)
+        # self.btn_close.setEnabled(True) 
+        # self.btn_axis.setEnabled(True) 
+        # self.timer_showDist.start(500)
+        # return True
     
     def Show_Dist(self):
         '''
         实时显示激光位移器距离读数
         '''          
         [time,distances] = self.hdweConnector.get_distances()
+        self.ShowColor.set_color(distances)
         self.lcdnum_dist1.display('{: 7.4f}'.format(distances[0]))
         self.lcdnum_dist2.display('{: 7.4f}'.format(distances[1]))
         self.lcdnum_dist3.display('{: 7.4f}'.format(distances[2]))
@@ -148,9 +231,16 @@ class MyMainWindow(QMainWindow,Ui_MainWindow):
     def Meas_Static(self):
         '''
         静态测量
-        '''            
+        '''     
         [time,distances] = self.hdweConnector.get_distances()
-        self.lcdnum_staticMeas.display(self.dataProcessor.get_angle(distances))
+        self.lcdnum_staticMeas.display('{: 7.4f}'.format(self.dataProcessor.get_angle(distances)))
+        # import numpy as np
+        # dist = []  
+        # for i in range(5):
+        #     [time,distances] = self.hdweConnector.get_distances()
+        #     dist.append(self.dataProcessor.get_angle(distances))
+        # self.lcdnum_staticMeas.display('{: 7.4f}'.format(np.mean(dist)))
+
 
     def Meas_Dynamic(self,isChecked):
         '''
