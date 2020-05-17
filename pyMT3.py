@@ -334,3 +334,7 @@ def turnonoff_device(handle, deviceIndex, laserOnOff):
     '''
     err = SetLaserPower(handle, deviceIndex, laserOnOff)
     return err
+
+
+if __name__ == '__main__':
+    print(GetErrorText(1310))

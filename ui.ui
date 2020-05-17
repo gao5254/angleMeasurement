@@ -97,13 +97,12 @@
            </property>
            <item>
             <widget class="QPushButton" name="btn_laser_1">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
              <property name="font">
               <font>
                <family>宋体</family>
                <pointsize>11</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
               </font>
              </property>
              <property name="text">
@@ -116,13 +115,12 @@
            </item>
            <item>
             <widget class="QPushButton" name="btn_laser_2">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
              <property name="font">
               <font>
                <family>宋体</family>
                <pointsize>11</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
               </font>
              </property>
              <property name="text">
@@ -135,13 +133,12 @@
            </item>
            <item>
             <widget class="QPushButton" name="btn_laser_3">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
              <property name="font">
               <font>
                <family>宋体</family>
                <pointsize>11</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
               </font>
              </property>
              <property name="text">
@@ -499,7 +496,7 @@
      <x>0</x>
      <y>0</y>
      <width>997</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>

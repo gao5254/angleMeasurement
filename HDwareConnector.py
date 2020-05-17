@@ -17,7 +17,8 @@ class MyThread(QThread):
         super().__init__()
 
         # 定义线程锁
-        self.threadLock = QMutex()
+        self.disLock = QMutex()
+        self.comLock = QMutex()
         # 定义待读取数据
         self.distance = 0.0
         # 定义扫描开关
@@ -30,21 +31,18 @@ class MyThread(QThread):
         self.ind = 0
         # 设备连接状态
         self.isConnecting = False
-        # 光点打开状态
-        self.isTurnOn = True
 
     def run(self):
         while self.isScanning:
+            self.comLock.lock()
             (err, num, _) = mt.get_number(self.handle, self.ind)
+            self.comLock.unlock()
             if err == 0:
-                self.threadLock.lock()
+                self.disLock.lock()
                 self.distance = num
                 self.readingTime = time.time()
-                self.threadLock.unlock()
+                self.disLock.unlock()
             else:
-                if ~self.isTurnOn:
-                    continue
-                else:
                     self.errorHappened.emit(err)
                     break
 
@@ -55,7 +53,9 @@ class MyThread(QThread):
         :param openedNum: 设备序号（int）
         :return: 是否打开（bool（1：成功；0：失败））
         """
+        self.comLock.lock()
         (err, self.handle, self.ind) = mt.open_device(portNum)
+        self.comLock.unlock()
         if err == 0:
             # self.openFinished.emit(openedNum)
             # self.beginTime = time.time()
@@ -80,10 +80,10 @@ class MyThread(QThread):
         获取当前线程激光位移传感器的读数和时间
         :return: 激光位移传感器读数和时间
         """
-        self.threadLock.lock()
+        self.disLock.lock()
         num = self.distance
         readTime = self.readingTime
-        self.threadLock.unlock()
+        self.disLock.unlock()
         return (num, readTime)
 
     # def my_unlock(self):
@@ -105,17 +105,20 @@ class MyThread(QThread):
         关闭设备，返回true/false
         """
         if self.isConnecting:
+            self.comLock.lock()
             mt.close_device(self.handle)
+            self.comLock.unlock()
             self.isConnecting = False
 
     def my_turn_onoff(self, onOff):
         if self.isConnecting:
+            self.comLock.lock()
             err = mt.turnonoff_device(self.handle, self.ind, onOff)
+            self.comLock.unlock()
             if err != 0:
                 self.errorHappened.emit(err)
                 return False
             else:
-                self.isTurnOn = bool(onOff)
                 return True
         else:
             return False

@@ -21,7 +21,6 @@ from ui import Ui_MainWindow
 # from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-
 class ShowColor(QWidget):
     # 开关激光器光点信号
     laserTurned = pyqtSignal(int, bool)
@@ -84,19 +83,19 @@ class ShowColor(QWidget):
         for i in range(3):
             if (distances[i] >= -50) and (distances[i] < -4):
                 self.btn_laser[i].setStyleSheet(
-                    "background: rgb(0,0,205)")     # indigo
+                    "background: rgb(0,0,205);color:rgb(255,255,255)")     # indigo
             elif (distances[i] >= -4) and (distances[i] <= 4):
                 self.btn_laser[i].setStyleSheet(
-                    "background: rgb(0,255,0)")     # green
+                    "background: rgb(0,255,0);color:rgb(0,0,0)")     # green
             elif (distances[i] > 4) and (distances[i] <= 50):
                 self.btn_laser[i].setStyleSheet(
-                    "background: rgb(148,0,211)")   # violet
+                    "background: rgb(148,0,211);color:rgb(255,255,255)")   # violet
             elif ((distances[i] > -62.5) and (distances[i] < -50)) or ((distances[i] > 50) and (distances[i] < 62.5)):
                 self.btn_laser[i].setStyleSheet(
-                    "background: rgb(0,255,255)")   # cyan
+                    "background: rgb(0,255,255);color:rgb(0,0,0)")   # cyan
             else:
                 self.btn_laser[i].setStyleSheet(
-                    "background: rgb(255,0,0)")     # red
+                    "background: rgb(255,0,0);color:rgb(255,255,255)")     # red
 
     def close_laser(self, i, isChecked):
         # if self.btn_laser[i].isChecked():
@@ -111,7 +110,7 @@ class ShowColor(QWidget):
             self.btn_laser[i].setText('打开' + str(i+1) + '号端口')
         else:
             self.btn_laser[i].setText('关闭' + str(i+1) + '号端口')
-        self.laserTurned.emit(i, ~isChecked)
+        self.laserTurned.emit(i, not isChecked)
 
 
 class MyMainWindow(QMainWindow, Ui_MainWindow):
@@ -162,14 +161,16 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         # with open("..\\calibPara.json",'w') as write_f:
         #     write_f.write(testJson)
         #     write_f.close()
-
-        with open("calibPara.json", 'r') as load_f:
-            load_dict = json.load(load_f)
-        if self.dataProcessor.set_calib_para(load_dict):
-            self.btn_open.setEnabled(True)
-            self.statusBar().showMessage('成功获取激光器参数', self.timestatus)
-        else:
-            QMessageBox.critical(self, '错误提示', '激光器标定失败')
+        try:
+            with open("calibPara.json", 'r') as load_f:
+                load_dict = json.load(load_f)
+            if self.dataProcessor.set_calib_para(load_dict):
+                self.btn_open.setEnabled(True)
+                self.statusBar().showMessage('成功获取激光器参数', self.timestatus)
+            else:
+                QMessageBox.critical(self, '错误提示', '获取激光器参数失败')
+        except IOError:
+            QMessageBox.critical(self, '错误提示', '打开calibPara.json文件失败')
 
     # 信号处理函数
     def Signal_portFin(self, number):
@@ -275,18 +276,21 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         '''
         读取旋转轴标定参数
         '''
-        with open("axisPara.json", 'r') as load_f:
-            load_dict = json.load(load_f)
-        if self.dataProcessor.read_axis(load_dict):
-            # 零位标定按钮
-            self.btn_zero.setEnabled(True)
-            # 测量组按钮
-            self.measureBox.setEnabled(True)
+        try:
+            with open("axisPara.json", 'r') as load_f:
+                load_dict = json.load(load_f)
+            if self.dataProcessor.read_axis(load_dict):
+                # 零位标定按钮
+                self.btn_zero.setEnabled(True)
+                # 测量组按钮
+                self.measureBox.setEnabled(True)
 
-            self.iscalib = True
-            self.statusBar().showMessage('成功获取旋转轴参数', self.timestatus)
-        else:
-            QMessageBox.critical(self, '错误提示', '未能获得旋转轴参数')
+                self.iscalib = True
+                self.statusBar().showMessage('成功获取旋转轴参数', self.timestatus)
+            else:
+                QMessageBox.critical(self, '错误提示', '未能获得旋转轴参数')
+        except IOError:
+            QMessageBox.critical(self, '错误提示', '打开axisPara.json失败')
 
     def Save_Para(self):
         '''
@@ -296,6 +300,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
             axisPara = self.dataProcessor.get_axis_para()
             with open("axisPara.json", 'w') as write_f:
                 json.dump(axisPara, write_f)
+            self.statusBar().showMessage('成功保存旋转轴参数', self.timestatus)
+
         else:
             QMessageBox.critical(self, '错误提示', '尚未标定旋转轴参数')
 
@@ -368,8 +374,10 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.paraBox.setEnabled(False)
         # 硬件组按钮
         self.ShowColor.setEnabled(False)
+        self.btn_laser_1.setChecked(False)
+        self.btn_laser_2.setChecked(False)
+        self.btn_laser_3.setChecked(False)
         self.btn_close.setEnabled(False)
-
 
     def closeEvent(self, event):
         '''
