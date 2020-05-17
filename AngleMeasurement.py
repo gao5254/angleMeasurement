@@ -120,6 +120,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         # 主窗口绘制完毕后绘制子窗口
         self.ShowColor.setupUi()
+
+        self.iscalib = False
         self.timestatus = 3000
 
         # 重写成员变量
@@ -140,6 +142,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_close.clicked.connect(self.Close_Devices)
         self.btn_axis.clicked.connect(self.Set_Axis)
         self.btn_zero.clicked.connect(self.Set_Zero)
+        self.btn_readPara.clicked.connect(self.Read_Para)
+        self.btn_savePara.clicked.connect(self.Save_Para)
         self.btn_staticMeas.clicked.connect(self.Meas_Static)
         self.btn_dynaMeas.toggled.connect(self.Meas_Dynamic)
 
@@ -197,8 +201,16 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         # 打开设备并开启线程进行扫描
         if self.hdweConnector.open_devices(portnumber):
             self.statusBar().showMessage('成功连接设备', self.timestatus)
+            # 硬件组按钮
             self.btn_close.setEnabled(True)
-            self.btn_axis.setEnabled(True)
+            self.ShowColor.setEnabled(True)
+            # 参数组按钮
+            self.paraBox.setEnabled(True)
+            # 测量组按钮
+            if self.iscalib:
+                self.measureBox.setEnabled(True)
+                self.btn_zero.setEnabled(True)
+            # 打开定时器
             self.timer_showDist.start(500)
         else:
             QMessageBox.critical(self, '错误提示', '硬件连接失败')
@@ -238,9 +250,10 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         '''
         旋转轴标定：计算过程
         '''
-        print("gatherFinished")
+        # print("gatherFinished")
         if self.dataProcessor.set_axis(twoDimenList):
             self.statusBar().showMessage('成功标定旋转轴', self.timestatus)
+            # 解锁零位标定
             self.btn_zero.setEnabled(True)
         else:
             QMessageBox.critical(self, '错误提示', '标定旋转轴失败')
@@ -252,11 +265,39 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         [time, distances] = self.hdweConnector.get_distances()
         if self.dataProcessor.set_zero(distances):
             self.statusBar().showMessage('成功确定零位面', self.timestatus)
-            self.btn_staticMeas.setEnabled(True)
-            self.btn_dynaMeas.setEnabled(True)
-            self.checkbox_save.setEnabled(True)
+            self.iscalib = True
+            # 测量组按钮
+            self.measureBox.setEnabled(True)
         else:
             QMessageBox.critical(self, '错误提示', '确定零位面失败')
+
+    def Read_Para(self):
+        '''
+        读取旋转轴标定参数
+        '''
+        with open("axisPara.json", 'r') as load_f:
+            load_dict = json.load(load_f)
+        if self.dataProcessor.read_axis(load_dict):
+            # 零位标定按钮
+            self.btn_zero.setEnabled(True)
+            # 测量组按钮
+            self.measureBox.setEnabled(True)
+
+            self.iscalib = True
+            self.statusBar().showMessage('成功获取旋转轴参数', self.timestatus)
+        else:
+            QMessageBox.critical(self, '错误提示', '未能获得旋转轴参数')
+
+    def Save_Para(self):
+        '''
+        存储旋转轴标定数据
+        '''
+        if self.iscalib:
+            axisPara = self.dataProcessor.get_axis_para()
+            with open("axisPara.json", 'w') as write_f:
+                json.dump(axisPara, write_f)
+        else:
+            QMessageBox.critical(self, '错误提示', '尚未标定旋转轴参数')
 
     def Meas_Static(self):
         '''
@@ -315,21 +356,27 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         '''
         # reply = QMessageBox.question(self, 'Message','确定关闭设备吗?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         # if reply == QMessageBox.Yes:
+        # 关闭定时器
         self.timer_showDist.stop()
+        # 关闭动态测量
         self.btn_dynaMeas.setChecked(False)    # 触发Meas_Dynamic中的弹起部分
-        self.btn_axis.setEnabled(False)
-        self.btn_zero.setEnabled(False)
-        self.btn_staticMeas.setEnabled(False)
-        self.btn_dynaMeas.setEnabled(False)
-        self.checkbox_save.setEnabled(False)
+        # 关闭设备
         self.hdweConnector.close_devices()
+        # 测量组按钮
+        self.measureBox.setEnabled(False)
+        # 参数组按钮
+        self.paraBox.setEnabled(False)
+        # 硬件组按钮
+        self.ShowColor.setEnabled(False)
+        self.btn_close.setEnabled(False)
+
 
     def closeEvent(self, event):
         '''
         关闭对话框
         '''
         reply = QMessageBox.question(self, 'Message', '确定退出程序吗?',
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self.Close_Devices()
             event.accept()

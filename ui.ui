@@ -10,20 +10,25 @@
     <height>686</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>11</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>角度测量</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="5,0">
+   <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="9,2">
     <item>
      <widget class="QTabWidget" name="tabWidget_2">
       <widget class="QWidget" name="tabWidgetPage1">
        <attribute name="title">
         <string>结果</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout" rowstretch="5,10,10,5,10,5,60">
-        <item row="3" column="0">
-         <widget class="QLabel" name="lab_staticMeas">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="5,10,10,5,10,5,60">
+        <item>
+         <widget class="QLabel" name="lab_dist">
           <property name="font">
            <font>
             <family>宋体</family>
@@ -31,14 +36,14 @@
            </font>
           </property>
           <property name="text">
-           <string>静态测量结果：角度/°</string>
+           <string>激光器读数：距离/mm</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QLCDNumber" name="lcdnum_dist1">
@@ -72,53 +77,11 @@
           </item>
          </layout>
         </item>
-        <item row="6" column="0">
-         <widget class="lineChartWgt" name="lineChartWgt" native="true"/>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLCDNumber" name="lcdnum_staticMeas">
-          <property name="smallDecimalPoint">
-           <bool>true</bool>
-          </property>
-          <property name="digitCount">
-           <number>7</number>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="lab_dist">
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>激光器读数：距离/mm</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="lab_dynaMeas">
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>动态测量结果</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
+        <item>
          <widget class="ShowColor" name="ShowColor" native="true">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <property name="leftMargin">
             <number>0</number>
@@ -134,6 +97,9 @@
            </property>
            <item>
             <widget class="QPushButton" name="btn_laser_1">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="font">
               <font>
                <family>宋体</family>
@@ -150,6 +116,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="btn_laser_2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="font">
               <font>
                <family>宋体</family>
@@ -166,6 +135,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="btn_laser_3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="font">
               <font>
                <family>宋体</family>
@@ -183,6 +155,51 @@
           </layout>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="lab_staticMeas">
+          <property name="font">
+           <font>
+            <family>宋体</family>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>静态测量结果：角度/°</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="lcdnum_staticMeas">
+          <property name="smallDecimalPoint">
+           <bool>true</bool>
+          </property>
+          <property name="digitCount">
+           <number>7</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lab_dynaMeas">
+          <property name="font">
+           <font>
+            <family>宋体</family>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>动态测量结果</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="lineChartWgt" name="lineChartWgt" native="true"/>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -196,202 +213,265 @@
        <attribute name="title">
         <string>控制</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>9</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_1">
-          <item>
-           <widget class="QLabel" name="lab_portNum_1">
-            <property name="font">
-             <font>
-              <family>宋体</family>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>1号端口</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="spinbox_portNum_1">
-            <property name="value">
-             <number>3</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QLabel" name="lab_portNum_2">
-            <property name="font">
-             <font>
-              <family>宋体</family>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>2号端口</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="spinbox_portNum_2">
-            <property name="value">
-             <number>4</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="lab_portNum_3">
-            <property name="font">
-             <font>
-              <family>宋体</family>
-              <pointsize>11</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>3号端口</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="spinbox_portNum_3">
-            <property name="value">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_open">
-          <property name="enabled">
-           <bool>false</bool>
+         <widget class="QGroupBox" name="connectBox">
+          <property name="title">
+           <string>硬件连接</string>
           </property>
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
-          <property name="text">
-           <string>连接设备</string>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_close">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>关闭设备</string>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_axis">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>旋转轴标定</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_zero">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>零位确定</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_staticMeas">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>静态测量</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_dynaMeas">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>动态测量</string>
-          </property>
-          <property name="checkable">
+          <property name="flat">
            <bool>true</bool>
           </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="1" column="0">
+            <widget class="QLabel" name="lab_portNum_2">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>2号端口</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="spinbox_portNum_2">
+             <property name="value">
+              <number>4</number>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lab_portNum_3">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>3号端口</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spinbox_portNum_3">
+             <property name="value">
+              <number>5</number>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QPushButton" name="btn_open">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>连接设备</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="lab_portNum_1">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>1号端口</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="spinbox_portNum_1">
+             <property name="value">
+              <number>3</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QPushButton" name="btn_close">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>关闭设备</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkbox_save">
+         <widget class="QGroupBox" name="paraBox">
           <property name="enabled">
            <bool>false</bool>
           </property>
-          <property name="font">
-           <font>
-            <family>宋体</family>
-            <pointsize>11</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-            <strikeout>false</strikeout>
-           </font>
+          <property name="title">
+           <string>参数确定</string>
           </property>
-          <property name="text">
-           <string>保存至文件</string>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <property name="horizontalSpacing">
+            <number>3</number>
+           </property>
+           <item row="0" column="0" colspan="2">
+            <widget class="QPushButton" name="btn_axis">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>旋转轴标定</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QPushButton" name="btn_zero">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>零位确定</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QPushButton" name="btn_readPara">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>读取参数</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="btn_savePara">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>保存参数</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="measureBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="title">
+           <string>角度测量</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QPushButton" name="btn_staticMeas">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>静态测量</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_dynaMeas">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>动态测量</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkbox_save">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+               <weight>50</weight>
+               <italic>false</italic>
+               <bold>false</bold>
+               <strikeout>false</strikeout>
+              </font>
+             </property>
+             <property name="text">
+              <string>保存至文件</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
@@ -419,7 +499,7 @@
      <x>0</x>
      <y>0</y>
      <width>997</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
