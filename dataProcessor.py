@@ -80,6 +80,9 @@ class dataProcessor(QObject):
             point3[0] - point1[0], point3[1] - point1[1], point3[2] - point1[2]
         ]
 
+        vector1 = np.dot(self.RotationMatrix, vector1)
+        vector2 = np.dot(self.RotationMatrix, vector2)
+
         # 两个向量求法向量，并归一化
         normalvector = [1, 1, 1]
         newvector = [1, 1, 1]
@@ -88,9 +91,7 @@ class dataProcessor(QObject):
         # normalvector[2] = vector1[0] * vector2[1] - vector2[0] * vector1[1]
         normalvector = np.cross(vector1, vector2)
         sum = np.linalg.norm(normalvector)
-        newvector[0] = normalvector[0] / sum
-        newvector[1] = normalvector[1] / sum
-        newvector[2] = normalvector[2] / sum
+        newvector = normalvector / sum
 
         # 返回归一化法向量
         return newvector
@@ -108,6 +109,47 @@ class dataProcessor(QObject):
         else:
             return False
 
+    def set_axis2(self,distancesList: list) ->bool:
+        n=len(distancesList)
+        nrows=3
+        ncols=n
+        array=[[1]*nrows]*ncols
+        #求取最小二乘法G矩阵
+        for i in range(n):
+            #array[i]=self.get_corrected_distances(distancesList[i])
+            array[i]=self.get_vector(distancesList[i])
+        #将列表转化为矩阵
+        y1=[[1]*1]*ncols
+        a=[[-1]*1]*ncols
+        a=np.array(a)
+        #a=np.transpose(a)
+        y=np.array(y1)
+        A=np.array(array)
+        # A=np.transpose(A)
+        # A=np.dot(self.a,A)
+        # A=np.transpose(A)#n*3
+        A1=A[:,0:2]
+        A1=np.append(A1, a, axis=1)
+        y=-100*A[:,2]
+        At=np.transpose(A1) #转置
+        #y=np.transpose(y2)#转置
+        #最小二乘法求旋转轴
+        X=np.dot(np.dot(np.linalg.inv(np.dot(At,A1)),At),y)
+        #旋转轴乘以旋转矩阵，并归一化
+        #X=np.transpose(X)
+        #X=np.dot(a,X)
+        #X=np.transpose(X)
+        #sum1=math.sqrt(X[0]**2+X[1]**2+X[2]**2)
+        #self.axis[0]=X[0]/sum1
+        #self.axis[1]=X[1]/sum1
+        #self.axis[2]=X[2]/sum1
+        realaxis=X[0:2]
+        realaxis=np.append(realaxis, [100], axis=0)
+        #q=np.dot(np.linalg.inv(self.a),realaxis)
+        y=np.linalg.norm(realaxis, axis=0, keepdims=True)
+        self.axis=realaxis/y
+        return True
+
     def set_axis(self, distancesList: list) -> bool:
         '''接口函数，完成旋转轴标定过程
         供主程序调用，传入*二维列表*，进行旋转轴标定，并记录在类内部，返回是否成功设置
@@ -123,9 +165,9 @@ class dataProcessor(QObject):
         NewArray = [[1] * 1] * ncols
         NewMatrix = np.array(NewArray)
         NewMatrixA = np.array(array)
-        NewMatrixA = np.transpose(NewMatrixA)
-        NewMatrixA = np.dot(self.RotationMatrix, NewMatrixA)
-        NewMatrixA = np.transpose(NewMatrixA)  # n*3
+        # NewMatrixA = np.transpose(NewMatrixA)
+        # NewMatrixA = np.dot(self.RotationMatrix, NewMatrixA)
+        # NewMatrixA = np.transpose(NewMatrixA)  # n*3
         NewMatrixAt = np.transpose(NewMatrixA)  # 转置
         # 最小二乘法求旋转轴
         RotationAxis = np.dot(
@@ -144,8 +186,10 @@ class dataProcessor(QObject):
         vector = np.array(vector)
         # vector=np.transpose(vector)
         # axis=np.array(self.axis)
-        newvector = np.dot(self.RotationMatrix, vector)
-        newzero_vector = np.dot(self.RotationMatrix, self.zeroVector)
+        # newvector = np.dot(self.RotationMatrix, vector)
+        # newzero_vector = np.dot(self.RotationMatrix, self.zeroVector)
+        newvector = vector
+        newzero_vector = self.zeroVector
         self.axis = self.axis.reshape(3)
         NormalVector1 = np.cross(newvector, self.axis)  # 向量叉乘
         NormalVector2 = np.cross(newzero_vector, self.axis)  # 向量叉乘
@@ -168,21 +212,43 @@ class dataProcessor(QObject):
 if __name__ == "__main__":
     processor1 = dataProcessor()
     a = processor1.set_calib_para({
-        "parallelRatio": [1, 1, 1],
-        "frontOffset": [0, 0, 0],
-        "xyCoordinate": [[0, 120], [-60, 0], [60, 0]]
+        "parallelRatio": [1.0032464383880204,
+        1.0006628010117244,
+        1.0018212851273283],
+        "frontOffset": [-0.087369469061961524,
+        0.044005986644371831,
+        0.043363482417589694],
+        "xyCoordinate": [[
+            -0.26299022917343962,
+            119.68114118793503
+        ],
+        [
+            -60.679538974097966,
+            -0.064027064808072964
+        ],
+        [
+            60.679538974097966,
+            0.064027064808087175
+        ]]
     })
     print(a)
     b = processor1.get_corrected_distances([1, 1, 1])
     print(b)
     c = processor1.get_vector([4, 8, 10])
     print(c)
-    d = processor1.set_zero([0, 0, 0])
+    d = processor1.set_zero([0.303, -0.3955, 0.3187])
     print(d)
-    e = processor1.set_axis([[0, 0, 0], [10, 0, 0.0002], [-21, 0.0001, 0],
-                             [-32, 0.0001, 0.0001], [43, 0.0002, 0.0001]])
-    print(e)
+    e = processor1.set_axis([[0.30385, -0.395596, 0.318728], [1.07997,10.8051,-9.68715], [1.53737,22.3281,-20.6895],
+                             [-0.656339	,-11.8904,10.1878], [-2.25074,-24.3517,20.4447]])
+    print(processor1.axis)
+
+    f = processor1.get_angle([1.07521,10.7875,-9.66941])
+    print(f)
+
+    e = processor1.set_axis2([[0.30385, -0.395596, 0.318728], [1.07997, 10.8051, -9.68715], [1.53737, 22.3281, -20.6895],
+                             [-0.656339, -11.8904, 10.1878], [-2.25074, -24.3517, 20.4447]])
+    print(processor1.axis)
     dic = processor1.get_axis_para()
     print(dic)
-    f = processor1.get_angle([27, 0, 0])
+    f = processor1.get_angle([1.07521,10.7875,-9.66941])
     print(f)
