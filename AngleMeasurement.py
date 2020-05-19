@@ -354,7 +354,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.lineChartWgt.add_angle(time-self.t_start, angle)
         if self.checkbox_save.isChecked():
             if self.datasaver.write_distances(time-self.t_start, distances, angle):
-                print('Saving...')
+                # print('Saving...')
+                pass
 
     def Close_Devices(self):
         '''
