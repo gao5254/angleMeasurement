@@ -122,6 +122,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
         self.iscalib = False
         self.timestatus = 3000
+        self.axisDistances = []
 
         # 重写成员变量
         self.hdweConnector = HDwareConnector.hdwareConnector()
@@ -252,6 +253,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         旋转轴标定：计算过程
         '''
         # print("gatherFinished")
+        self.axisDistances = twoDimenList
         if self.dataProcessor.set_axis(twoDimenList):
             self.statusBar().showMessage('成功标定旋转轴', self.timestatus)
             # 解锁零位标定
@@ -298,12 +300,13 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         '''
         if self.iscalib:
             axisPara = self.dataProcessor.get_axis_para()
+            axisPara['axisDistances'] = self.axisDistances
             with open("axisPara.json", 'w') as write_f:
                 json.dump(axisPara, write_f)
             self.statusBar().showMessage('成功保存旋转轴参数', self.timestatus)
 
         else:
-            QMessageBox.critical(self, '错误提示', '尚未标定旋转轴参数')
+            QMessageBox.critical(self, '错误提示', '尚未标定旋转轴或零位参数')
 
     def Meas_Static(self):
         '''

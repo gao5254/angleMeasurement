@@ -9,7 +9,7 @@ class dataProcessor(QObject):
             "frontOffset": [1, 1, 1],
             "xyCoordinate": [[1, 1], [1, 1], [1, 1]]
         }
-        self.zeroDistances = 0
+        self.zeroDistance = np.ones(3)
         self.zeroVector = np.ones(3)
         self.axis = np.ones(3)
         self.RotationMatrix = np.array(
@@ -36,7 +36,7 @@ class dataProcessor(QObject):
         返回包含参数的字典
         '''
         axisPara = {
-            'zeroDistances': self.zeroDistances,
+            'zeroDistance': self.zeroDistance.tolist(),
             'zeroVector': self.zeroVector.tolist(),
             'axis': self.axis.tolist()
         }
@@ -59,7 +59,7 @@ class dataProcessor(QObject):
         '''接口函数，设置零位面
         供主程序调用，传入一个包含三个距离值的列表，计算零位面的位置并记录在类内部，返回是否成功设置
         '''
-        self.zeroDistances = distances[0]
+        self.zeroDistance = distances
         ZeroVector = self.get_vector(distances)
         ZeroVector = np.array(ZeroVector)
         self.zeroVector = np.transpose(ZeroVector)
@@ -107,8 +107,8 @@ class dataProcessor(QObject):
 
         返回读取成功
         '''
-        if 'zeroDistances' in axisPara and 'zeroVector' in axisPara and 'axis' in axisPara:
-            self.zeroDistances = axisPara['zeroDistances']
+        if 'zeroDistance' in axisPara and 'zeroVector' in axisPara and 'axis' in axisPara:
+            self.zeroDistance = np.array(axisPara['zeroDistance'])
             self.zeroVector = np.array(axisPara['zeroVector'])
             self.axis = np.array(axisPara['axis'])
             return True
@@ -207,7 +207,7 @@ class dataProcessor(QObject):
         angle = np.arccos(cos_angle)
         angle = angle * 180 / np.pi
         # 判断distances第一个点正负
-        if distances[0] < self.zeroDistances:
+        if distances[0] < self.zeroDistance[0]:
             angle = -1 * angle
         return angle
 
