@@ -115,47 +115,6 @@ class dataProcessor(QObject):
         else:
             return False
 
-    def set_axis2(self, distancesList: list) -> bool:
-        n=len(distancesList)
-        nrows=3
-        ncols=n
-        array=[[1]*nrows]*ncols
-        #求取最小二乘法G矩阵
-        for i in range(n):
-            #array[i]=self.get_corrected_distances(distancesList[i])
-            array[i]=self.get_vector(distancesList[i])
-        #将列表转化为矩阵
-        y1=[[1]*1]*ncols
-        a=[[-1]*1]*ncols
-        a=np.array(a)
-        #a=np.transpose(a)
-        y=np.array(y1)
-        A=np.array(array)
-        # A=np.transpose(A)
-        # A=np.dot(self.a,A)
-        # A=np.transpose(A)#n*3
-        A1=A[:,0:2]
-        A1=np.append(A1, a, axis=1)
-        y=-100*A[:,2]
-        At=np.transpose(A1) #转置
-        #y=np.transpose(y2)#转置
-        #最小二乘法求旋转轴
-        X=np.dot(np.dot(np.linalg.inv(np.dot(At,A1)),At),y)
-        #旋转轴乘以旋转矩阵，并归一化
-        #X=np.transpose(X)
-        #X=np.dot(a,X)
-        #X=np.transpose(X)
-        #sum1=math.sqrt(X[0]**2+X[1]**2+X[2]**2)
-        #self.axis[0]=X[0]/sum1
-        #self.axis[1]=X[1]/sum1
-        #self.axis[2]=X[2]/sum1
-        realaxis=X[0:2]
-        realaxis=np.append(realaxis, [100], axis=0)
-        #q=np.dot(np.linalg.inv(self.a),realaxis)
-        y=np.linalg.norm(realaxis, axis=0, keepdims=True)
-        self.axis=realaxis/y
-        return True
-
     def set_axis(self, distancesList: list) -> bool:
         '''接口函数，完成旋转轴标定过程
         供主程序调用，传入*二维列表*，进行旋转轴标定，并记录在类内部，返回是否成功设置

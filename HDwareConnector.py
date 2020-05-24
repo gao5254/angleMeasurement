@@ -1,7 +1,7 @@
 import time
 
 from PyQt5.QtCore import QMutex, QObject, QThread, pyqtSignal
-
+from typing import List
 import pyMT3 as mt
 
 # import fakeMT as mt
@@ -10,8 +10,8 @@ import pyMT3 as mt
 
 class MyThread(QThread):
 
-    # 发生错误，错误代码
-    errorHappened = pyqtSignal(int)
+    # 发生错误，错误出现地方，错误代码
+    errorHappened = pyqtSignal(str, int)
 
     def __init__(self):
         super().__init__()
@@ -43,8 +43,8 @@ class MyThread(QThread):
                 self.readingTime = time.time()
                 self.disLock.unlock()
             else:
-                    self.errorHappened.emit(err)
-                    break
+                self.errorHappened.emit('获取读数', err)
+                break
 
     def my_open_device(self, portNum, openedNum):
         """
@@ -63,7 +63,7 @@ class MyThread(QThread):
             return True
         else:
             self.isConnecting = False
-            # self.errorHappened.emit(err)
+            self.errorHappened.emit('打开设备', err)
             return False
 
     def my_start(self):
@@ -116,12 +116,32 @@ class MyThread(QThread):
             err = mt.turnonoff_device(self.handle, self.ind, onOff)
             self.comLock.unlock()
             if err != 0:
-                self.errorHappened.emit(err)
+                self.errorHappened.emit('开关激光光点', err)
                 return False
             else:
                 return True
         else:
             return False
+
+    def my_set_fre(self, fre):
+        if self.isConnecting and fre in mt.filterFrequencyList:
+            self.comLock.lock()
+            err = mt.set_filter_index(self.handle, self.ind, mt.filterFrequencyList.index(fre))
+            self.comLock.unlock()
+            if err != 0:
+                self.errorHappened.emit('设置滤波频率', err)
+                return False
+            else:
+                return True
+        else:
+            return False
+
+    def my_get_fre(self):
+        if self.isConnecting:
+            self.comLock.lock()
+            (err, fre) = mt.get_filter_frequency(self.handle, self.ind)
+            self.comLock.unlock()
+            return fre
 
 
 class hdwareConnector(QObject):
@@ -129,18 +149,23 @@ class hdwareConnector(QObject):
     # 设备打开成功信号
     openFinished = pyqtSignal(int)
     # 发生错误，错误代码
-    errorOccured = pyqtSignal(int)
+    errorOccured = pyqtSignal(str)
 
     def __init__(self):
         super(hdwareConnector, self).__init__()
         # 定义三个线程对象
-        self.threads = [MyThread(), MyThread(), MyThread()]
+        # self.threads = [MyThread(), MyThread(), MyThread()]
+        self.threads: List[MyThread] = [MyThread(), MyThread(), MyThread()]
         # 信号连接
-        for i in range(3):
-            self.threads[i].errorHappened.connect(self.OnErrorHappened)
-
-    def OnErrorHappened(self, err):
-        self.errorOccured.emit(err)
+        # for i in range(3):
+        #     self.threads[i].errorHappened.connect(lambda loc, err: self.OnErrorHappened(i, loc, err))
+        self.threads[0].errorHappened.connect(lambda loc, err: self.OnErrorHappened(0, loc, err))
+        self.threads[1].errorHappened.connect(lambda loc, err: self.OnErrorHappened(1, loc, err))
+        self.threads[2].errorHappened.connect(lambda loc, err: self.OnErrorHappened(2, loc, err))
+        
+    def OnErrorHappened(self, ind, loc, err):
+        errStr = str(ind + 1) + '号端口的(' + loc + ')过程\n' + str(err) + ':' + mt.get_error_text(err)
+        self.errorOccured.emit(errStr)
 
     def open_devices(self, portNum):
         """
@@ -166,7 +191,10 @@ class hdwareConnector(QObject):
         for i in range(3):
             if not self.threads[i].my_open_device(portNum[i], i):
                 return False
-        for i in range(3):
+            # print(self.threads[i].my_get_fre())
+            if not self.threads[i].my_set_fre(200):
+                return False
+            # print(self.threads[i].my_get_fre())
             if not self.threads[i].my_start():
                 self.close_devices()
                 return False
@@ -217,24 +245,24 @@ if __name__ == "__main__":
     myConnector = hdwareConnector()
     myConnector.open_devices([3, 4, 5])
     thistime = time.time()
-    for i in range(5):
-        time.sleep(0.5)
-        res = myConnector.get_distances()
-        print(res)
-    print('\n\n')
-    time.sleep(1)
-    myConnector.turnonoff_laser(0, False)
-    time.sleep(2)
-    for i in range(10):
-        time.sleep(0.5)
-        res = myConnector.get_distances()
-        print(res)
-    print('\n\n')
-    print(myConnector.threads[0].isRunning())
-    print(myConnector.turnonoff_laser(0, True))
-    time.sleep(1)
-    for i in range(10):
-        time.sleep(0.5)
+    # for i in range(5):
+    #     time.sleep(0.5)
+    #     res = myConnector.get_distances()
+    #     print(res)
+    # print('\n\n')
+    # time.sleep(1)
+    # myConnector.turnonoff_laser(0, False)
+    # time.sleep(2)
+    # for i in range(10):
+    #     time.sleep(0.1)
+    #     res = myConnector.get_distances()
+    #     print(res)
+    # print('\n\n')
+    # print(myConnector.threads[0].isRunning())
+    # print(myConnector.turnonoff_laser(0, True))
+    # time.sleep(1)
+    for i in range(20):
+        time.sleep(0.05)
         res = myConnector.get_distances()
         print(res)
 

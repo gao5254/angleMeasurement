@@ -72,11 +72,11 @@ class ShowColor(QWidget):
         self.btn_laser = self.findChildren(QPushButton)
 
         self.btn_laser[0].toggled.connect(
-            lambda isChecked: self.close_laser(0, isChecked))
+            lambda isChecked: self.turnOnOff_laser(0, isChecked))
         self.btn_laser[1].toggled.connect(
-            lambda isChecked: self.close_laser(1, isChecked))
+            lambda isChecked: self.turnOnOff_laser(1, isChecked))
         self.btn_laser[2].toggled.connect(
-            lambda isChecked: self.close_laser(2, isChecked))
+            lambda isChecked: self.turnOnOff_laser(2, isChecked))
 
     def set_color(self, distances):
 
@@ -97,7 +97,7 @@ class ShowColor(QWidget):
                 self.btn_laser[i].setStyleSheet(
                     "background: rgb(255,0,0);color:rgb(255,255,255)")     # red
 
-    def close_laser(self, i, isChecked):
+    def turnOnOff_laser(self, i, isChecked):
         # if self.btn_laser[i].isChecked():
         #     self.btn_laser[i].setText('打开' + str(i+1) + '号端口')
         #     # 关闭端口
@@ -169,23 +169,24 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
                 self.btn_open.setEnabled(True)
                 self.statusBar().showMessage('成功获取激光器参数', self.timestatus)
             else:
-                QMessageBox.critical(self, '错误提示', '获取激光器参数失败')
+                QMessageBox.critical(self, '获取激光器参数错误', 'calibPara.json缺少需要的内容')
         except IOError:
-            QMessageBox.critical(self, '错误提示', '打开calibPara.json文件失败')
+            QMessageBox.critical(self, '文件读写错误', '打开calibPara.json文件失败')
 
     # 信号处理函数
     def Signal_portFin(self, number):
         '''
         依次显示已成功连接的端口号；处理openFinished信号
         '''
-        self.statusBar().showMessage(str(number) + '号端口已成功连接', self.timestatus)
+        # self.statusBar().showMessage(str(number) + '号端口已成功连接')
+        self.openProgressBar.setValue(number)
 
     def Signal_hdweError(self, code):
         '''
-        显示硬件错误代码；处理errorOccured信号
+        显示硬件错误文本；处理errorOccured信号
         '''
         self.Close_Devices()
-        QMessageBox.critical(self, '错误提示', '硬件连接错误，错误代码'+str(code))
+        QMessageBox.critical(self, '硬件通信错误', code)
 
     # 功能函数
     def Open_Devices(self):
@@ -198,11 +199,10 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
                       self.spinbox_portNum_3.value()]
         # 若数组有重复则不进行下列操作
         if len(set(portnumber)) < 3:
-            QMessageBox.critical(self, '错误提示', '串口号有相同数字')
+            QMessageBox.critical(self, '设备串口错误', '串口号有相同数字')
             return
         # 打开设备并开启线程进行扫描
         if self.hdweConnector.open_devices(portnumber):
-            self.statusBar().showMessage('成功连接设备', self.timestatus)
             # 硬件组按钮
             self.btn_close.setEnabled(True)
             self.ShowColor.setEnabled(True)
@@ -214,8 +214,9 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
                 self.btn_zero.setEnabled(True)
             # 打开定时器
             self.timer_showDist.start(500)
+            self.statusBar().showMessage('成功连接设备', self.timestatus)
         else:
-            QMessageBox.critical(self, '错误提示', '硬件连接失败')
+            self.statusBar().showMessage('连接设备失败', self.timestatus)
 
         # # 测试用例
         # self.statusBar().showMessage('成功连接设备',self.timestatus)
@@ -290,9 +291,9 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
                 self.iscalib = True
                 self.statusBar().showMessage('成功获取旋转轴参数', self.timestatus)
             else:
-                QMessageBox.critical(self, '错误提示', '未能获得旋转轴参数')
+                QMessageBox.critical(self, '读取旋转轴参数错误', 'axisPara.json缺少需要的内容')
         except IOError:
-            QMessageBox.critical(self, '错误提示', '打开axisPara.json失败')
+            QMessageBox.critical(self, '文件读写错误', '打开axisPara.json失败')
 
     def Save_Para(self):
         '''
@@ -306,7 +307,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
             self.statusBar().showMessage('成功保存旋转轴参数', self.timestatus)
 
         else:
-            QMessageBox.critical(self, '错误提示', '尚未标定旋转轴或零位参数')
+            QMessageBox.critical(self, '无法保存', '尚未标定旋转轴或零位参数')
 
     def Meas_Static(self):
         '''
@@ -381,6 +382,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_laser_1.setChecked(False)
         self.btn_laser_2.setChecked(False)
         self.btn_laser_3.setChecked(False)
+        self.openProgressBar.setValue(0)
         self.btn_close.setEnabled(False)
 
     def closeEvent(self, event):

@@ -106,7 +106,7 @@
               </font>
              </property>
              <property name="text">
-              <string>1号端口</string>
+              <string>关闭1号端口</string>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -124,7 +124,7 @@
               </font>
              </property>
              <property name="text">
-              <string>2号端口</string>
+              <string>关闭2号端口</string>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -142,7 +142,7 @@
               </font>
              </property>
              <property name="text">
-              <string>3号端口</string>
+              <string>关闭3号端口</string>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -232,7 +232,33 @@
            <bool>true</bool>
           </property>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="1" column="0">
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="spinbox_portNum_1">
+             <property name="value">
+              <number>3</number>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="2">
+            <widget class="QPushButton" name="btn_close">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>关闭设备</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
             <widget class="QLabel" name="lab_portNum_2">
              <property name="font">
               <font>
@@ -245,34 +271,7 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="spinbox_portNum_2">
-             <property name="value">
-              <number>4</number>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="lab_portNum_3">
-             <property name="font">
-              <font>
-               <family>宋体</family>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>3号端口</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="spinbox_portNum_3">
-             <property name="value">
-              <number>5</number>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
+           <item row="5" column="0" colspan="2">
             <widget class="QPushButton" name="btn_open">
              <property name="enabled">
               <bool>false</bool>
@@ -291,7 +290,20 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="3" column="0">
+            <widget class="QLabel" name="lab_portNum_3">
+             <property name="font">
+              <font>
+               <family>宋体</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>3号端口</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
             <widget class="QLabel" name="lab_portNum_1">
              <property name="font">
               <font>
@@ -304,29 +316,36 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="spinbox_portNum_1">
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spinbox_portNum_2">
              <property name="value">
-              <number>3</number>
+              <number>4</number>
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QPushButton" name="btn_close">
-             <property name="enabled">
-              <bool>false</bool>
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="spinbox_portNum_3">
+             <property name="value">
+              <number>5</number>
              </property>
-             <property name="font">
-              <font>
-               <family>宋体</family>
-               <pointsize>11</pointsize>
-              </font>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QProgressBar" name="openProgressBar">
+             <property name="maximum">
+              <number>3</number>
              </property>
-             <property name="text">
-              <string>关闭设备</string>
+             <property name="value">
+              <number>0</number>
              </property>
-             <property name="checkable">
-              <bool>false</bool>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="textVisible">
+              <bool>true</bool>
+             </property>
+             <property name="format">
+              <string>已打开%v/%m</string>
              </property>
             </widget>
            </item>

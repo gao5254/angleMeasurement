@@ -298,7 +298,7 @@ def open_device(portNumber, deviceAddress=0, baudRate=57600):
     err = OpenInterface(portNumber, baudRate, byref(handle))
     if err != 0:
         return (err, handle, deviceIndex)
-    err = AddDevice(handle, 0, byref(deviceIndex))
+    err = AddDevice(handle, deviceAddress, byref(deviceIndex))
     if err != 0:
         return (err, handle, deviceIndex)
 
@@ -336,5 +336,36 @@ def turnonoff_device(handle, deviceIndex, laserOnOff):
     return err
 
 
+def get_error_text(err):
+    '''根据错误代码得到错误信息
+
+    返回错误定义信息
+    '''
+    errStr = GetErrorText(err)
+    return errStr.decode('utf-8')
+
+
+filterFrequencyList = [20000, 4000, 1000, 200, 25, 1, 0.1]
+
+
+def get_filter_frequency(handle, deviceIndex):
+    '''获取滤波器频率
+
+    返回错误代码及频率
+    '''
+    filterFrequency = c_float(0)
+    err = GetFilterFrequency(handle, deviceIndex, byref(filterFrequency))
+    return (err, filterFrequency.value)
+
+
+def set_filter_index(handle, deviceIndex, filterIndex):
+    '''设置滤波器频率，以频率序号设置
+
+    返回错误代码
+    '''
+    err = SetFilterIndex(handle, deviceIndex, filterIndex)
+    return err
+
+
 if __name__ == '__main__':
-    print(GetErrorText(1310))
+    print(get_error_text(1310))
