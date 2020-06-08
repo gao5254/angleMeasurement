@@ -165,6 +165,10 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         try:
             with open("calibPara.json", 'r') as load_f:
                 load_dict = json.load(load_f)
+            if 'portNum' in load_dict:
+                self.spinbox_portNum_1.setValue(load_dict['portNum'][0])
+                self.spinbox_portNum_2.setValue(load_dict['portNum'][1])
+                self.spinbox_portNum_3.setValue(load_dict['portNum'][2])
             if self.dataProcessor.set_calib_para(load_dict):
                 self.btn_open.setEnabled(True)
                 self.statusBar().showMessage('成功获取激光器参数', self.timestatus)
@@ -255,7 +259,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         '''
         # print("gatherFinished")
         self.axisDistances = twoDimenList
-        if self.dataProcessor.set_axis(twoDimenList):
+        if self.dataProcessor.set_axis_SVD(twoDimenList):
             self.statusBar().showMessage('成功标定旋转轴', self.timestatus)
             # 解锁零位标定
             self.btn_zero.setEnabled(True)
@@ -282,7 +286,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         try:
             with open("axisPara.json", 'r') as load_f:
                 load_dict = json.load(load_f)
-            if self.dataProcessor.read_axis(load_dict):
+            self.axisDistances = load_dict['axisDistances']
+            if self.dataProcessor.read_axis_raw(load_dict):
                 # 零位标定按钮
                 self.btn_zero.setEnabled(True)
                 # 测量组按钮
@@ -314,7 +319,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         静态测量
         '''
         [time, distances] = self.hdweConnector.get_distances()
-        self.lcdnum_staticMeas.display('{: 7.4f}'.format(
+        self.lcdnum_staticMeas.display('{: 6.3f}'.format(
             self.dataProcessor.get_angle(distances)))
         # import numpy as np
         # dist = []
@@ -353,7 +358,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage('正在动态测量', self.timestatus)
         [time, distances] = self.hdweConnector.get_distances()
         angle = self.dataProcessor.get_angle(distances)
-        self.lcdnum_staticMeas.display('{: 7.4f}'.format(angle))
+        self.lcdnum_staticMeas.display('{: 6.3f}'.format(angle))
         # self.lcdnum_staticMeas.display(angle)
         self.lineChartWgt.add_angle(time-self.t_start, angle)
         if self.checkbox_save.isChecked():

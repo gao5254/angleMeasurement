@@ -57,12 +57,11 @@ class dataProcessor(QObject):
 
     def set_zero(self, distances: list) -> bool:
         '''接口函数，设置零位面
+
         供主程序调用，传入一个包含三个距离值的列表，计算零位面的位置并记录在类内部，返回是否成功设置
         '''
-        self.zeroDistance = distances
-        ZeroVector = self.get_vector(distances)
-        ZeroVector = np.array(ZeroVector)
-        self.zeroVector = np.transpose(ZeroVector)
+        self.zeroDistance = np.array(distances)
+        self.zeroVector = self.get_vector(distances)
         return True
 
     def get_vector(self, distances: list):
@@ -115,6 +114,16 @@ class dataProcessor(QObject):
         else:
             return False
 
+    def read_axis_raw(self, axisPara: dict) -> bool:
+        '''接口函数，传入一个字典，读取旋转轴原始数据和零位数据，根据现有标定参数重新计算旋转轴参数和零位参数
+
+        返回读取成功
+        '''
+        if 'zeroDistance' in axisPara and 'axisDistances' in axisPara:
+            return self.set_axis_SVD(axisPara['axisDistances']) and self.set_zero(axisPara['zeroDistance'])
+        else:
+            return False
+
     def set_axis(self, distancesList: list) -> bool:
         '''接口函数，完成旋转轴标定过程
         供主程序调用，传入*二维列表*，进行旋转轴标定，并记录在类内部，返回是否成功设置
@@ -138,6 +147,25 @@ class dataProcessor(QObject):
         # 旋转轴乘以旋转矩阵，并归一化
         sumall = np.linalg.norm(RotationAxis)
         self.axis = RotationAxis / sumall
+        self.axis = np.squeeze(self.axis)
+        return True
+
+    def set_axis_SVD(self, distancesList: list) -> bool:
+        '''接口函数，完成旋转轴标定过程
+        供主程序调用，传入*二维列表*，进行旋转轴标定，并记录在类内部，返回是否成功设置
+        '''
+        ncols = len(distancesList)
+        matrixA = np.ones((ncols, 3))
+        # 求取SVD分解的矩阵A
+        for i in range(ncols):
+            matrixA[i, :] = self.get_vector(distancesList[i])
+        # SVD分解
+        (_, _, vh) = np.linalg.svd(matrixA, full_matrices=False)
+        # vh中最小的行向量即为旋转轴方向
+        RotationAxis = vh[-1, :]
+        # 旋转轴归一化
+        sumall = np.linalg.norm(RotationAxis)
+        RotationAxis = RotationAxis / sumall
         self.axis = np.squeeze(self.axis)
         return True
 
@@ -166,34 +194,18 @@ class dataProcessor(QObject):
         angle = np.arccos(cos_angle)
         angle = angle * 180 / np.pi
         # 判断distances第一个点正负
-        if distances[0] < self.zeroDistance[0]:
+        if distances[1] < self.zeroDistance[1]:
             angle = -1 * angle
         return angle
 
 
 # 实例
 if __name__ == "__main__":
+    import json
     processor1 = dataProcessor()
-    a = processor1.set_calib_para({
-        "parallelRatio": [1.0032464383880204,
-        1.0006628010117244,
-        1.0018212851273283],
-        "frontOffset": [-0.087369469061961524,
-        0.044005986644371831,
-        0.043363482417589694],
-        "xyCoordinate": [[
-            -0.26299022917343962,
-            119.68114118793503
-        ],
-        [
-            -60.679538974097966,
-            -0.064027064808072964
-        ],
-        [
-            60.679538974097966,
-            0.064027064808087175
-        ]]
-    })
+    with open('calibPara.json', 'r') as fp:
+        calibPara = json.load(fp)
+    a = processor1.set_calib_para(calibPara)
     # print(a)
     # b = processor1.get_corrected_distances([1, 1, 1])
     # print(b)
@@ -206,7 +218,11 @@ if __name__ == "__main__":
     # print(processor1.axis)
     with open('axisPara.json', 'r') as fp:
         axisPara = json.load(fp)
-    processor1.read_axis(axisPara)
-    f = processor1.get_angle([1.07521,10.7875,-9.66941])
+    processor1.set_axis(axisPara['axisDistances'])
+    print(processor1.axis)
+    f = processor1.get_angle([-2.100054979324341, -1.5163884162902832, -1.4973143339157104])
     print(f)
-
+    processor1.set_axis_SVD(axisPara['axisDistances'])
+    print(processor1.axis)
+    f = processor1.get_angle([-2.100054979324341, -1.5163884162902832, -1.4973143339157104])
+    print(f)

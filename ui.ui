@@ -174,7 +174,7 @@
            <bool>true</bool>
           </property>
           <property name="digitCount">
-           <number>7</number>
+           <number>6</number>
           </property>
          </widget>
         </item>
@@ -535,6 +535,25 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>spinbox_portNum_1</tabstop>
+  <tabstop>spinbox_portNum_2</tabstop>
+  <tabstop>spinbox_portNum_3</tabstop>
+  <tabstop>btn_open</tabstop>
+  <tabstop>btn_close</tabstop>
+  <tabstop>btn_axis</tabstop>
+  <tabstop>btn_zero</tabstop>
+  <tabstop>btn_readPara</tabstop>
+  <tabstop>btn_savePara</tabstop>
+  <tabstop>btn_staticMeas</tabstop>
+  <tabstop>btn_dynaMeas</tabstop>
+  <tabstop>checkbox_save</tabstop>
+  <tabstop>btn_laser_1</tabstop>
+  <tabstop>btn_laser_2</tabstop>
+  <tabstop>btn_laser_3</tabstop>
+  <tabstop>tabWidget_2</tabstop>
+  <tabstop>tabWidget_1</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
