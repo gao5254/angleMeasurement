@@ -166,7 +166,7 @@ class dataProcessor(QObject):
         # 旋转轴归一化
         sumall = np.linalg.norm(RotationAxis)
         RotationAxis = RotationAxis / sumall
-        self.axis = np.squeeze(self.axis)
+        self.axis = np.squeeze(RotationAxis)
         return True
 
     def get_angle(self, distances: list) -> float:
@@ -191,6 +191,8 @@ class dataProcessor(QObject):
 
         cos_angle = NormalVector1.dot(NormalVector2) / (NormalVector1Length *
                                                         NormalVector2Length)
+        if cos_angle > 1:
+            cos_angle = 1
         angle = np.arccos(cos_angle)
         angle = angle * 180 / np.pi
         # 判断distances第一个点正负
