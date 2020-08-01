@@ -234,6 +234,9 @@
           <layout class="QGridLayout" name="gridLayout">
            <item row="1" column="1">
             <widget class="QSpinBox" name="spinbox_portNum_1">
+             <property name="prefix">
+              <string>COM</string>
+             </property>
              <property name="value">
               <number>3</number>
              </property>
@@ -318,6 +321,9 @@
            </item>
            <item row="2" column="1">
             <widget class="QSpinBox" name="spinbox_portNum_2">
+             <property name="prefix">
+              <string>COM</string>
+             </property>
              <property name="value">
               <number>4</number>
              </property>
@@ -325,6 +331,9 @@
            </item>
            <item row="3" column="1">
             <widget class="QSpinBox" name="spinbox_portNum_3">
+             <property name="prefix">
+              <string>COM</string>
+             </property>
              <property name="value">
               <number>5</number>
              </property>
@@ -515,7 +524,7 @@
      <x>0</x>
      <y>0</y>
      <width>997</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

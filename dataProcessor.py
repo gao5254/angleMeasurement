@@ -166,7 +166,7 @@ class dataProcessor(QObject):
         # 旋转轴归一化
         sumall = np.linalg.norm(RotationAxis)
         RotationAxis = RotationAxis / sumall
-        self.axis = np.squeeze(self.axis)
+        self.axis = np.squeeze(RotationAxis)
         return True
 
     def get_angle(self, distances: list) -> float:
@@ -218,11 +218,11 @@ if __name__ == "__main__":
     # print(processor1.axis)
     with open('axisPara.json', 'r') as fp:
         axisPara = json.load(fp)
-    processor1.set_axis(axisPara['axisDistances'])
+    processor1.read_axis_raw(axisPara)
     print(processor1.axis)
-    f = processor1.get_angle([-2.100054979324341, -1.5163884162902832, -1.4973143339157104])
-    print(f)
-    processor1.set_axis_SVD(axisPara['axisDistances'])
-    print(processor1.axis)
-    f = processor1.get_angle([-2.100054979324341, -1.5163884162902832, -1.4973143339157104])
+    processor1.set_zero(axisPara['axisDistances'][6])
+    for ii in range(len(axisPara['axisDistances'])):
+        f = processor1.get_angle(axisPara['axisDistances'][ii])
+        print(f)
+    f = processor1.get_angle([-8.49368, 15.76662, -37.0285])
     print(f)
