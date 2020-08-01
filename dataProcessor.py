@@ -191,6 +191,8 @@ class dataProcessor(QObject):
 
         cos_angle = NormalVector1.dot(NormalVector2) / (NormalVector1Length *
                                                         NormalVector2Length)
+        if cos_angle > 1:
+            cos_angle = 1
         angle = np.arccos(cos_angle)
         angle = angle * 180 / np.pi
         # 判断distances第一个点正负
