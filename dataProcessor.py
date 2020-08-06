@@ -159,13 +159,15 @@ class dataProcessor(QObject):
         # 求取SVD分解的矩阵A
         for i in range(ncols):
             matrixA[i, :] = self.get_vector(distancesList[i])
+        # 矩阵A减去均值
+        matrixA = matrixA - np.mean(matrixA, 0)
         # SVD分解
         (_, _, vh) = np.linalg.svd(matrixA, full_matrices=False)
         # vh中最小的行向量即为旋转轴方向
         RotationAxis = vh[-1, :]
         # 旋转轴归一化
-        sumall = np.linalg.norm(RotationAxis)
-        RotationAxis = RotationAxis / sumall
+        # sumall = np.linalg.norm(RotationAxis)
+        # RotationAxis = RotationAxis / sumall
         self.axis = np.squeeze(RotationAxis)
         return True
 
@@ -222,9 +224,9 @@ if __name__ == "__main__":
         axisPara = json.load(fp)
     processor1.read_axis_raw(axisPara)
     print(processor1.axis)
-    processor1.set_zero(axisPara['axisDistances'][6])
-    for ii in range(len(axisPara['axisDistances'])):
-        f = processor1.get_angle(axisPara['axisDistances'][ii])
-        print(f)
-    f = processor1.get_angle([-8.49368, 15.76662, -37.0285])
-    print(f)
+    # processor1.set_zero(axisPara['axisDistances'][6])
+    # for ii in range(len(axisPara['axisDistances'])):
+    #     f = processor1.get_angle(axisPara['axisDistances'][ii])
+    #     print(f)
+    # f = processor1.get_angle([-8.49368, 15.76662, -37.0285])
+    # print(f)
