@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QMessageBox,
 import asixDlg
 import csvwriter
 import dataProcessor
+import dataProcessorAngleT
 import HDwareConnector
 from ui import Ui_MainWindow
 
@@ -123,10 +124,11 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.iscalib = False
         self.timestatus = 3000
         self.axisDistances = []
+        self.errCorrectRatio = 0.01
 
         # 重写成员变量
         self.hdweConnector = HDwareConnector.hdwareConnector()
-        self.dataProcessor = dataProcessor.dataProcessor()
+        # self.dataProcessor = dataProcessor.dataProcessor()
         self.axisCalib = asixDlg.axisDlg()
         self.datasaver = csvwriter.csvWriter(self)
 
@@ -165,10 +167,22 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         try:
             with open("calibPara.json", 'r') as load_f:
                 load_dict = json.load(load_f)
+
             if 'portNum' in load_dict:
                 self.spinbox_portNum_1.setValue(load_dict['portNum'][0])
                 self.spinbox_portNum_2.setValue(load_dict['portNum'][1])
                 self.spinbox_portNum_3.setValue(load_dict['portNum'][2])
+
+            if 'errCorrectRatio' in load_dict:
+                self.errCorrectRatio = load_dict['errCorrectRatio']
+            
+            if 'parallelRatio' in load_dict and 'frontOffset' in load_dict and 'xyCoordinate' in load_dict:
+                self.dataProcessor = dataProcessor.dataProcessor()
+            elif 'Angle' in load_dict and 'T' in load_dict:
+                self.dataProcessor = dataProcessorAngleT.dataProcessor()
+            else:
+                QMessageBox.critical(self, '获取激光器参数错误', 'calibPara.json缺少需要的内容')
+
             if self.dataProcessor.set_calib_para(load_dict):
                 self.btn_open.setEnabled(True)
                 self.statusBar().showMessage('成功获取激光器参数', self.timestatus)
@@ -319,8 +333,11 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         静态测量
         '''
         [time, distances] = self.hdweConnector.get_distances()
-        self.lcdnum_staticMeas.display('{: 6.3f}'.format(
-            self.dataProcessor.get_angle(distances)))
+        angle = self.dataProcessor.get_angle(distances)
+        if self.checkbox_correction.isChecked():
+            # 斜率校正
+            angle = angle * (1 + self.errCorrectRatio)
+        self.lcdnum_staticMeas.display('{: 6.3f}'.format(angle))
         # import numpy as np
         # dist = []
         # for i in range(5):
@@ -340,6 +357,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
             self.btn_staticMeas.setEnabled(False)
             self.btn_dynaMeas.setText('关闭动态测量')
             self.checkbox_save.setEnabled(False)
+            self.checkbox_correction.setEnabled(False)
             self.t_start = time.time()
             self.timer_measdyna.start(200)
         else:
@@ -347,6 +365,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
             self.btn_dynaMeas.setText('动态测量')
             self.btn_staticMeas.setEnabled(True)
             self.checkbox_save.setEnabled(True)
+            self.checkbox_correction.setEnabled(True)
             self.timer_measdyna.stop()
             if self.checkbox_save.isChecked():
                 self.datasaver.stop_writing()
@@ -358,6 +377,9 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage('正在动态测量', self.timestatus)
         [time, distances] = self.hdweConnector.get_distances()
         angle = self.dataProcessor.get_angle(distances)
+        if self.checkbox_correction.isChecked():
+            # 斜率校正
+            angle = angle * (1 + self.errCorrectRatio)
         self.lcdnum_staticMeas.display('{: 6.3f}'.format(angle))
         # self.lcdnum_staticMeas.display(angle)
         self.lineChartWgt.add_angle(time-self.t_start, angle)

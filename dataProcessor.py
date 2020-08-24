@@ -46,13 +46,16 @@ class dataProcessor(QObject):
         '''接口函数，计算校正后的距离值
         供主程序调用，传入原始距离值，返回校正后距离值
         '''
-        NewDistances = [k*x + b for x, k, b in zip(distances, self.cPara['parallelRatio'], self.cPara['frontOffset'])]
+        # NewDistances = [k*x + b for x, k, b in zip(distances, self.cPara['parallelRatio'], self.cPara['frontOffset'])]
         # NewDistances[0] = distances[0] * self.cPara['parallelRatio'][
         #     0] + self.cPara['frontOffset'][0]
         # NewDistances[1] = distances[1] * self.cPara['parallelRatio'][
         #     1] + self.cPara['frontOffset'][1]
         # NewDistances[2] = distances[2] * self.cPara['parallelRatio'][
         #     2] + self.cPara['frontOffset'][2]
+        
+        # 矩阵兼容性
+        NewDistances = distances * self.cPara['parallelRatio'] + self.cPara['frontOffset']
         return NewDistances
 
     def set_zero(self, distances: list) -> bool:
@@ -66,13 +69,23 @@ class dataProcessor(QObject):
 
     def get_vector(self, distances: list):
         # 输入三个Z值，求取归一化法向量
+        distances = np.array(distances).reshape(-1, 3)
         RightDistances = self.get_corrected_distances(distances)
-        point1 = self.cPara['xyCoordinate'][0] + [RightDistances[0]]
-        point1 = np.array(point1)
-        point2 = self.cPara['xyCoordinate'][1] + [RightDistances[1]]
-        point2 = np.array(point2)
-        point3 = self.cPara['xyCoordinate'][2] + [RightDistances[2]]
-        point3 = np.array(point3)
+        shape = RightDistances.shape
+        point1 = np.empty((shape[0], 3))
+        point1[:, 0] = self.cPara['xyCoordinate'][0, 0]
+        point1[:, 1] = self.cPara['xyCoordinate'][0, 1]
+        point1[:, 2] = RightDistances[:, 0]
+
+        point2 = np.empty((shape[0], 3))
+        point2[:, 0] = self.cPara['xyCoordinate'][1, 0]
+        point2[:, 1] = self.cPara['xyCoordinate'][1, 1]
+        point2[:, 2] = RightDistances[:, 1]
+
+        point3 = np.empty((shape[0], 3))
+        point3[:, 0] = self.cPara['xyCoordinate'][2, 0]
+        point3[:, 1] = self.cPara['xyCoordinate'][2, 1]
+        point3[:, 2] = RightDistances[:, 2]
 
         # 三个点转化为两个向量
         vector1 = point2 - point1
@@ -154,11 +167,12 @@ class dataProcessor(QObject):
         '''接口函数，完成旋转轴标定过程
         供主程序调用，传入*二维列表*，进行旋转轴标定，并记录在类内部，返回是否成功设置
         '''
-        ncols = len(distancesList)
-        matrixA = np.ones((ncols, 3))
+        # ncols = len(distancesList)
+        # matrixA = np.ones((ncols, 3))
         # 求取SVD分解的矩阵A
-        for i in range(ncols):
-            matrixA[i, :] = self.get_vector(distancesList[i])
+        # for i in range(ncols):
+        #     matrixA[i, :] = self.get_vector(distancesList[i]).ravel()
+        matrixA = self.get_vector(distancesList)
         # 矩阵A减去均值
         matrixA = matrixA - np.mean(matrixA, 0)
         # SVD分解
@@ -175,31 +189,21 @@ class dataProcessor(QObject):
         '''接口函数，完成角度计算
         供主程序调用，传入一个包含三个距离值的列表，根据标定参数、旋转轴、零位面计算旋转角度，返回计算得到的角度
         '''
+        distances = np.array(distances).reshape(-1, 3)
         vector = self.get_vector(distances)
-        # vector = np.array(vector)
-        # vector=np.transpose(vector)
-        # axis=np.array(self.axis)
-        # newvector = np.dot(self.RotationMatrix, vector)
-        # newzero_vector = np.dot(self.RotationMatrix, self.zeroVector)
-        # newvector = vector
-        # newzero_vector = self.zeroVector
-        # self.axis = self.axis.reshape(3)
         NormalVector1 = np.cross(vector, self.axis)  # 向量叉乘
         NormalVector2 = np.cross(self.zeroVector, self.axis)  # 向量叉乘
-        # NormalVector1Length = np.sqrt(NormalVector1.dot(NormalVector1))
-        # NormalVector2Length = np.sqrt(NormalVector2.dot(NormalVector2))
-        NormalVector1Length = np.linalg.norm(NormalVector1)
-        NormalVector2Length = np.linalg.norm(NormalVector2)
 
-        cos_angle = NormalVector1.dot(NormalVector2) / (NormalVector1Length *
-                                                        NormalVector2Length)
-        if cos_angle > 1:
-            cos_angle = 1
+        NormalVector1Length = np.linalg.norm(NormalVector1, axis=1)
+        NormalVector2Length = np.linalg.norm(NormalVector2, axis=1)
+        temp = np.sum(NormalVector1 * NormalVector2, axis=1)
+        cos_angle = temp / (NormalVector1Length * NormalVector2Length)
+        cos_angle[cos_angle > 1] = 1
         angle = np.arccos(cos_angle)
         angle = angle * 180 / np.pi
+
         # 判断distances第一个点正负
-        if distances[1] < self.zeroDistance[1]:
-            angle = -1 * angle
+        angle[distances[:, 1] < self.zeroDistance[1]] = - angle[distances[:, 1] < self.zeroDistance[1]]
         return angle
 
 

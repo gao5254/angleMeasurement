@@ -496,6 +496,13 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_correction">
+             <property name="text">
+              <string>误差校正</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>

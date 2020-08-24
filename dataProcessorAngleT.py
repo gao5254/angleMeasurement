@@ -14,13 +14,28 @@ class dataProcessor(QObject):
         '''接口函数，设置标定参数
         供主程序调用，传入一个含有标定参数的字典，将其保存为类的内部成员变量，返回是否成功调用
         '''
-        self.cPara["Angle"] = np.array(calibPara["Angle"])
-        self.cPara["T"] = np.array(calibPara["T"])
-        self.RArray[0:3] = self.get_R_vector(self.cPara["Angle"][0:3])
-        self.RArray[3:6] = self.get_R_vector(self.cPara["Angle"][3:6])
-        self.RArray[6:9] = self.get_R_vector(self.cPara["Angle"][6:9])
-        # print(self.RArray)
-        return True
+        if 'Angle' in calibPara and 'T' in calibPara:
+            self.cPara["Angle"] = np.array(calibPara["Angle"])
+            self.cPara["T"] = np.array(calibPara["T"])
+            self.RArray[0:3] = self.get_R_vector(self.cPara["Angle"][0:3])
+            self.RArray[3:6] = self.get_R_vector(self.cPara["Angle"][3:6])
+            self.RArray[6:9] = self.get_R_vector(self.cPara["Angle"][6:9])
+            # print(self.RArray)
+            return True
+        else:
+            return False
+
+    def get_axis_para(self):
+        '''接口函数，导出旋转轴参数和零位参数
+
+        返回包含参数的字典
+        '''
+        axisPara = {
+            'zeroDistance': self.zeroDistance.tolist(),
+            'zeroVector': self.zeroVector.tolist(),
+            'axis': self.axis.tolist()
+        }
+        return axisPara
 
     def get_R_vector(self, angles):
         alpha, beta, gamma = angles
@@ -77,18 +92,21 @@ class dataProcessor(QObject):
         '''接口函数，完成旋转轴标定过程
         供主程序调用，传入*二维列表*，进行旋转轴标定，并记录在类内部，返回是否成功设置
         '''
-        ncols = len(distancesList)
-        matrixA = np.ones((ncols, 3))
+        # ncols = len(distancesList)
+        # matrixA = np.ones((ncols, 3))
         # 求取SVD分解的矩阵A
-        for i in range(ncols):
-            matrixA[i, :] = self.get_vector(distancesList[i]).ravel()
+        # for i in range(ncols):
+        #     matrixA[i, :] = self.get_vector(distancesList[i]).ravel()
+        matrixA = self.get_vector(distancesList)
+        # 矩阵A减去均值
+        matrixA = matrixA - np.mean(matrixA, 0)
         # SVD分解
         (_, _, vh) = np.linalg.svd(matrixA, full_matrices=False)
         # vh中最小的行向量即为旋转轴方向
         RotationAxis = vh[-1, :]
         # 旋转轴归一化
-        sumall = np.linalg.norm(RotationAxis)
-        RotationAxis = RotationAxis / sumall
+        # sumall = np.linalg.norm(RotationAxis)
+        # RotationAxis = RotationAxis / sumall
         self.axis = np.squeeze(RotationAxis)
         return True
 

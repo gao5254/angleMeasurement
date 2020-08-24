@@ -265,6 +265,9 @@ class Ui_MainWindow(object):
         self.checkbox_save.setFont(font)
         self.checkbox_save.setObjectName("checkbox_save")
         self.verticalLayout.addWidget(self.checkbox_save)
+        self.checkBox_correction = QtWidgets.QCheckBox(self.measureBox)
+        self.checkBox_correction.setObjectName("checkBox_correction")
+        self.verticalLayout.addWidget(self.checkBox_correction)
         self.verticalLayout_3.addWidget(self.measureBox)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem)
@@ -330,6 +333,7 @@ class Ui_MainWindow(object):
         self.btn_staticMeas.setText(_translate("MainWindow", "静态测量"))
         self.btn_dynaMeas.setText(_translate("MainWindow", "动态测量"))
         self.checkbox_save.setText(_translate("MainWindow", "保存至文件"))
+        self.checkBox_correction.setText(_translate("MainWindow", "误差校正"))
         self.tabWidget_1.setTabText(self.tabWidget_1.indexOf(self.tab), _translate("MainWindow", "控制"))
 from AngleMeasurement import ShowColor
 from lineChartWgt import lineChartWgt
