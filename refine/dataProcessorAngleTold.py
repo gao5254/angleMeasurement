@@ -6,35 +6,21 @@ class dataProcessor(QObject):
     def __init__(self):  # 构造函数
         self.cPara = {"Angle": None, "T": None}
         self.zeroDistance = np.ones(3)
-        self.zeroVector = np.ones(3)
+        self.zeroVector = np.ones((1, 3))
         self.axis = np.ones(3)
-        self.RArray = np.ones(9)
+        self.RArray = np.empty((9, ))
 
     def set_calib_para(self, calibPara):
         '''接口函数，设置标定参数
         供主程序调用，传入一个含有标定参数的字典，将其保存为类的内部成员变量，返回是否成功调用
         '''
-        if 'Angle' in calibPara and 'T' in calibPara:
-            self.cPara["Angle"] = np.array(calibPara["Angle"])
-            self.cPara["T"] = np.array(calibPara["T"])
-            self.RArray[0:3] = self.get_R_vector(self.cPara["Angle"][0:3])
-            self.RArray[3:6] = self.get_R_vector(self.cPara["Angle"][3:6])
-            self.RArray[6:9] = self.get_R_vector(self.cPara["Angle"][6:9])
-            return True
-        else:
-            return False
-
-    def get_axis_para(self):
-        '''接口函数，导出旋转轴参数和零位参数
-
-        返回包含参数的字典
-        '''
-        axisPara = {
-            'zeroDistance': self.zeroDistance.tolist(),
-            'zeroVector': self.zeroVector.ravel().tolist(),
-            'axis': self.axis.tolist()
-        }
-        return axisPara
+        self.cPara["Angle"] = np.array(calibPara["Angle"])
+        self.cPara["T"] = np.array(calibPara["T"])
+        self.RArray[0:3] = self.get_R_vector(self.cPara["Angle"][0:3])
+        self.RArray[3:6] = self.get_R_vector(self.cPara["Angle"][3:6])
+        self.RArray[6:9] = self.get_R_vector(self.cPara["Angle"][6:9])
+        # print(self.RArray)
+        return True
 
     def get_R_vector(self, angles):
         alpha, beta, gamma = angles
@@ -91,21 +77,18 @@ class dataProcessor(QObject):
         '''接口函数，完成旋转轴标定过程
         供主程序调用，传入*二维列表*，进行旋转轴标定，并记录在类内部，返回是否成功设置
         '''
-        # ncols = len(distancesList)
-        # matrixA = np.ones((ncols, 3))
+        ncols = len(distancesList)
+        matrixA = np.ones((ncols, 3))
         # 求取SVD分解的矩阵A
-        # for i in range(ncols):
-        #     matrixA[i, :] = self.get_vector(distancesList[i]).ravel()
-        matrixA = self.get_vector(distancesList)
-        # 矩阵A减去均值
-        matrixA = matrixA - np.mean(matrixA, 0)
+        for i in range(ncols):
+            matrixA[i, :] = self.get_vector(distancesList[i]).ravel()
         # SVD分解
         (_, _, vh) = np.linalg.svd(matrixA, full_matrices=False)
         # vh中最小的行向量即为旋转轴方向
         RotationAxis = vh[-1, :]
         # 旋转轴归一化
-        # sumall = np.linalg.norm(RotationAxis)
-        # RotationAxis = RotationAxis / sumall
+        sumall = np.linalg.norm(RotationAxis)
+        RotationAxis = RotationAxis / sumall
         self.axis = np.squeeze(RotationAxis)
         return True
 
@@ -126,9 +109,8 @@ class dataProcessor(QObject):
         angle = np.arccos(cos_angle)
         angle = angle * 180 / np.pi
 
-        # 判断distances第二个点正负
-        iMap = distances[:, 1] < self.zeroDistance[1]
-        angle[iMap] = - angle[iMap]
+        # 判断distances第一个点正负
+        angle[distances[:, 1] < self.zeroDistance[1]] = - angle[distances[:, 1] < self.zeroDistance[1]]
         return angle
 
 
@@ -136,15 +118,14 @@ class dataProcessor(QObject):
 if __name__ == "__main__":
     import json
     processor = dataProcessor()
-    with open('calibParaAngleT.json', 'r') as fp:
+    with open('calibParaAngleT1.json', 'r') as fp:
         calibPara = json.load(fp)
     a = processor.set_calib_para(calibPara)
 
-    with open('axisPara.json', 'r') as fp:
+    with open('axisPara正.json', 'r') as fp:
         axisPara = json.load(fp)
     processor.read_axis_raw(axisPara)
     print(processor.axis)
     print("%" * 20)
-    f = processor.get_angle([[-4.9516282081604, -2.10768461227417, -10.41634750366211],
-                             [-2.0809807777404785, -14.799570083618164, 8.566164016723633]])
+    f = processor.get_angle([-5.497146606, 0.257499933, -14.20827293])
     print(f)
