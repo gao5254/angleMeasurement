@@ -124,7 +124,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.iscalib = False
         self.timestatus = 3000
         self.axisDistances = []
-        self.errCorrectRatio = 0.01
+        self.errCorrectRatio = 0.00911362
 
         # 重写成员变量
         self.hdweConnector = HDwareConnector.hdwareConnector()
@@ -175,7 +175,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
             if 'errCorrectRatio' in load_dict:
                 self.errCorrectRatio = load_dict['errCorrectRatio']
-            
+           
             if 'parallelRatio' in load_dict and 'frontOffset' in load_dict and 'xyCoordinate' in load_dict:
                 self.dataProcessor = dataProcessor.dataProcessor()
             elif 'Angle' in load_dict and 'T' in load_dict:
@@ -337,7 +337,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         if self.checkbox_correction.isChecked():
             # 斜率校正
             angle = angle * (1 + self.errCorrectRatio)
-        self.lcdnum_staticMeas.display('{: 6.3f}'.format(angle))
+        self.lcdnum_staticMeas.display('{: 6.3f}'.format(angle[0]))
         # import numpy as np
         # dist = []
         # for i in range(5):
@@ -380,7 +380,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         if self.checkbox_correction.isChecked():
             # 斜率校正
             angle = angle * (1 + self.errCorrectRatio)
-        self.lcdnum_staticMeas.display('{: 6.3f}'.format(angle))
+        self.lcdnum_staticMeas.display('{: 6.3f}'.format(angle[0]))
         # self.lcdnum_staticMeas.display(angle)
         self.lineChartWgt.add_angle(time-self.t_start, angle)
         if self.checkbox_save.isChecked():

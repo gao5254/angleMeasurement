@@ -497,7 +497,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox_correction">
+            <widget class="QCheckBox" name="checkbox_correction">
              <property name="text">
               <string>误差校正</string>
              </property>
@@ -531,7 +531,7 @@
      <x>0</x>
      <y>0</y>
      <width>997</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
